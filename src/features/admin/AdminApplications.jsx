@@ -12,7 +12,7 @@ export default function AdminApplications() {
 const [rejectReason,setRejectReason] = useState("")
   const loadApps = async () => {
     try{
-      const res = await axios.get(`http://localhost:5000/api/applications?status=${status}`)
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/applications?status=${status}`)
       setApps(res.data)
     }catch{
       toast.error("Failed to load applications")
@@ -21,14 +21,14 @@ const [rejectReason,setRejectReason] = useState("")
 
   const loadPendingCount = async () => {
     try{
-      const res = await axios.get(`http://localhost:5000/api/applications?status=pending`)
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/applications?status=pending`)
       setPendingCount(res.data.length)
     }catch{}
   }
 
   const approve = async (id) => {
     try{
-      await axios.put(`http://localhost:5000/api/applications/${id}/approve`)
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/applications/${id}/approve`)
       toast.success("Application approved")
       loadApps()
       loadPendingCount()
@@ -41,7 +41,7 @@ const reject = async () => {
   try{
 
     await axios.put(
-      `http://localhost:5000/api/applications/${rejectId}/reject`,
+      `${process.env.REACT_APP_API_URL}/api/applications/${rejectId}/reject`,
       { reason: rejectReason }
     )
 

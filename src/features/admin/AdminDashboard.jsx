@@ -16,10 +16,10 @@ export default function AdminDashboard() {
     try{
 
       const [users, caregivers, bookings, apps] = await Promise.all([
-axios.get("http://localhost:5000/api/users?role=user"),
-        axios.get("http://localhost:5000/api/users?role=caregiver"),
-        axios.get("http://localhost:5000/api/bookings"),
-        axios.get("http://localhost:5000/api/applications?status=pending")
+axios.get("${process.env.REACT_APP_API_URL}/api/users?role=user"),
+        axios.get("${process.env.REACT_APP_API_URL}/api/users?role=caregiver"),
+        axios.get("${process.env.REACT_APP_API_URL}/api/bookings"),
+        axios.get("${process.env.REACT_APP_API_URL}/api/applications?status=pending")
 
         
       ])

@@ -91,7 +91,7 @@ export default function ApplyCaregiver() {
       })
 
       await axios.post(
-        "http://localhost:5000/api/applications/apply",
+        "${process.env.REACT_APP_API_URL}/api/applications/apply",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       )

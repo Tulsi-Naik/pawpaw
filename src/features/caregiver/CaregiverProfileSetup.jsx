@@ -61,7 +61,7 @@ const handleSubmit = async (e) => {
     }
 
     const res = await fetch(
-      "http://localhost:5000/api/caregivers/setup-profile",
+      "${process.env.REACT_APP_API_URL}/api/caregivers/setup-profile",
       {
         method: "PUT",
         headers: {

@@ -11,7 +11,7 @@ export default function PetProfilePage() {
 
   useEffect(() => {
 
-    fetch("http://localhost:5000/api/pets/my", {
+    fetch("${process.env.REACT_APP_API_URL}/api/pets/my", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())

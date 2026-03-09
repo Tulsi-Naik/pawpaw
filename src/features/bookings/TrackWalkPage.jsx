@@ -36,7 +36,7 @@ export default function TrackWalkPage() {
     const interval = setInterval(async () => {
 
       const res = await fetch(
-        `http://localhost:5000/api/location/${bookingId}`,
+        `${process.env.REACT_APP_API_URL}/api/location/${bookingId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
