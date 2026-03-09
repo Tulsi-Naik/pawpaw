@@ -8,7 +8,7 @@ export default function CaregiverSchedule() {
   const [date, setDate] = useState(new Date())
 
   useEffect(() => {
-    fetch("${process.env.REACT_APP_API_URL}/api/bookings/my-assignments", {
+    fetch(`${process.env.REACT_APP_API_URL}/api/bookings/my-assignments`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -37,7 +37,7 @@ export default function CaregiverSchedule() {
 
   console.log("GPS:", lat, lng)
 
-      await fetch("${process.env.REACT_APP_API_URL}/api/location/update", {
+      await fetch(`${process.env.REACT_APP_API_URL}/api/location/update`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

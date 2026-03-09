@@ -10,10 +10,10 @@ useEffect(() => {
   const fetchData = async () => {
     try {
       const [openRes, assignedRes] = await Promise.all([
-        fetch("${process.env.REACT_APP_API_URL}/api/bookings/open", {
+        fetch(`${process.env.REACT_APP_API_URL}/api/bookings/open`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch("${process.env.REACT_APP_API_URL}/api/bookings/my-assignments", {
+        fetch(`${process.env.REACT_APP_API_URL}/api/bookings/my-assignments`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ])

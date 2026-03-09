@@ -19,7 +19,7 @@ export default function MyBookingsPage() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch("${process.env.REACT_APP_API_URL}/api/bookings/my", {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/bookings/my`, {
           headers: { Authorization: `Bearer ${token}` }
         })
 
