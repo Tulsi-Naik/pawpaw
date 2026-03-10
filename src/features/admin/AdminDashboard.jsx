@@ -16,13 +16,13 @@ export default function AdminDashboard() {
     try{
 
       const [users, caregivers, bookings, apps] = await Promise.all([
-axios.get(`${process.env.VITE_API_URL}/api/users?role=user`),
+axios.get(`${import.meta.env.VITE_API_URL}/api/users?role=user`),
 
-axios.get(`${process.env.VITE_API_URL}/api/users?role=caregiver`),
+axios.get(`${import.meta.env.VITE_API_URL}/api/users?role=caregiver`),
 
-axios.get(`${process.env.VITE_API_URL}/api/bookings`),
+axios.get(`${import.meta.env.VITE_API_URL}/api/bookings`),
 
-axios.get(`${process.env.VITE_API_URL}/api/applications?status=pending`)
+axios.get(`${import.meta.env.VITE_API_URL}/api/applications?status=pending`)
 
         
       ])

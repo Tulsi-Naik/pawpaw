@@ -11,7 +11,7 @@ export default function PetProfilePage() {
 
   useEffect(() => {
 
-    fetch(`${process.env.VITE_API_URL}/api/pets/my`, {
+    fetch(`${import.meta.env.VITE_API_URL}/api/pets/my`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())

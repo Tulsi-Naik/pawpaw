@@ -36,7 +36,7 @@ export default function TrackWalkPage() {
     const interval = setInterval(async () => {
 
       const res = await fetch(
-        `${process.env.VITE_API_URL}/api/location/${bookingId}`,
+        `${import.meta.env.VITE_API_URL}/api/location/${bookingId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
 

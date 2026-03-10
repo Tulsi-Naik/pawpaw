@@ -4,7 +4,7 @@ export const bookGrooming = async (data) => {
   const token = localStorage.getItem("token")
 
   const res = await axios.post(
-    `${process.env.VITE_API_URL}/api/bookings/create`,
+    `${import.meta.env.VITE_API_URL}/api/bookings/create`,
     data,
     {
       headers: {

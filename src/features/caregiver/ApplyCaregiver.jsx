@@ -91,7 +91,7 @@ export default function ApplyCaregiver() {
       })
 
       await axios.post(
-        `${process.env.VITE_API_URL}/api/applications/apply`,
+        `${import.meta.env.VITE_API_URL}/api/applications/apply`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       )

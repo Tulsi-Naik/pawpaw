@@ -8,7 +8,7 @@ export default function CaregiverSchedule() {
   const [date, setDate] = useState(new Date())
 
   useEffect(() => {
-    fetch(`${process.env.VITE_API_URL}/api/bookings/my-assignments`, {
+    fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my-assignments`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -37,7 +37,7 @@ export default function CaregiverSchedule() {
 
   console.log("GPS:", lat, lng)
 
-      await fetch(`${process.env.VITE_API_URL}/api/location/update`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/location/update`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +136,7 @@ export default function CaregiverSchedule() {
       <button
         onClick={async () => {
 
-  await fetch(`${process.env.VITE_API_URL}/api/bookings/${b._id}/start`, {
+  await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${b._id}/start`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` }
   })
@@ -157,7 +157,7 @@ setBookings(prev =>
     {b.status === "InProgress" && (
       <button
         onClick={async () => {
-          await fetch(`${process.env.VITE_API_URL}/api/bookings/${b._id}/complete`, {
+          await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${b._id}/complete`, {
             method: "PUT",
             headers: { Authorization: `Bearer ${token}` }
           })

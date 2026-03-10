@@ -19,7 +19,7 @@ export default function MyBookingsPage() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch(`${process.env.VITE_API_URL}/api/bookings/my`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my`, {
           headers: { Authorization: `Bearer ${token}` }
         })
 
@@ -38,7 +38,7 @@ export default function MyBookingsPage() {
   const handleCancel = async (id) => {
     try {
       const res = await fetch(
-        `${process.env.VITE_API_URL}/api/bookings/${id}/cancel`,
+        `${import.meta.env.VITE_API_URL}/api/bookings/${id}/cancel`,
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` }

@@ -16,7 +16,7 @@ const token = localStorage.getItem("token")
 
 useEffect(() => {
   const fetchServices = async () => {
-const res = await axios.get(`${process.env.VITE_API_URL}/api/services?category=grooming`)
+const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/services?category=grooming`)
     setServices(Array.isArray(res.data) ? res.data : [])
   }
 
@@ -26,7 +26,7 @@ const res = await axios.get(`${process.env.VITE_API_URL}/api/services?category=g
 useEffect(() => {
   const fetchPets = async () => {
     const res = await axios.get(
-      "${process.env.VITE_API_URL}/api/pets/my",
+      "${import.meta.env.VITE_API_URL}/api/pets/my",
       {
         headers: { Authorization: `Bearer ${token}` }
       }

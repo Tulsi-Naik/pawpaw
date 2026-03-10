@@ -61,7 +61,7 @@ const handleSubmit = async (e) => {
     }
 
     const res = await fetch(
-      `${process.env.VITE_API_URL}/api/caregivers/setup-profile`,
+      `${import.meta.env.VITE_API_URL}/api/caregivers/setup-profile`,
       {
         method: "PUT",
         headers: {
