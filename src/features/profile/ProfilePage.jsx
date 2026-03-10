@@ -19,7 +19,7 @@ const [editingPetId, setEditingPetId] = useState(null)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userRes = await fetch(`${process.env.REACT_APP_API_URL}/api/users/me`, {
+        const userRes = await fetch(`${process.env.VITE_API_URL}/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         const userData = await userRes.json()
@@ -31,7 +31,7 @@ const [editingPetId, setEditingPetId] = useState(null)
           city: userData.city || ""
         })
 
-        const petsRes = await fetch(`${process.env.REACT_APP_API_URL}/api/pets/my`, {
+        const petsRes = await fetch(`${process.env.VITE_API_URL}/api/pets/my`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         const petsData = await petsRes.json()
@@ -50,7 +50,7 @@ const [editingPetId, setEditingPetId] = useState(null)
   // Save personal info
   const handleUserSave = async () => {
     try {
-      await fetch(`${process.env.REACT_APP_API_URL}/api/users/update`, {
+      await fetch(`${process.env.VITE_API_URL}/api/users/update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -72,7 +72,7 @@ const [editingPetId, setEditingPetId] = useState(null)
 const handlePetUpdate = async (pet) => {
   try {
 
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/api/pets/${pet._id}`, {
+    const res = await fetch(`${process.env.VITE_API_URL}/api/pets/${pet._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +99,7 @@ const handlePetUpdate = async (pet) => {
   // Delete pet
   const handlePetDelete = async (id) => {
     try {
-      await fetch(`${process.env.REACT_APP_API_URL}/api/pets/${id}`, {
+      await fetch(`${process.env.VITE_API_URL}/api/pets/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -114,7 +114,7 @@ const handlePetUpdate = async (pet) => {
   // Add new pet
   const handleAddPet = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/pets/add`, {
+      const res = await fetch(`${process.env.VITE_API_URL}/api/pets/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

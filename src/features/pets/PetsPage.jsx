@@ -34,7 +34,7 @@ export default function PetsPage() {
   const speedEmoji = ["🐢","🚶","🏃","💨","⚡"]
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/pets/my`, {
+    fetch(`${process.env.VITE_API_URL}/api/pets/my`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -54,7 +54,7 @@ useEffect(() => {
     let res
 
     if (editingPet) {
-      res = await fetch(`${process.env.REACT_APP_API_URL}/api/pets/${editingPet}`, {
+      res = await fetch(`${process.env.VITE_API_URL}/api/pets/${editingPet}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +63,7 @@ useEffect(() => {
         body: JSON.stringify(form)
       })
     } else {
-      res = await fetch(`${process.env.REACT_APP_API_URL}/api/pets/add`, {
+      res = await fetch(`${process.env.VITE_API_URL}/api/pets/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,7 +80,7 @@ if (res.ok) {
   setEditingPet(null)
   setForm(emptyForm)
 
-  const data = await fetch(`${process.env.REACT_APP_API_URL}/api/pets/my`, {
+  const data = await fetch(`${process.env.VITE_API_URL}/api/pets/my`, {
     headers: { Authorization: `Bearer ${token}` }
   }).then(r => r.json())
 

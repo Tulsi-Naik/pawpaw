@@ -11,13 +11,13 @@ export default function DashboardPage() {
   b => new Date(b.date) >= new Date() && b.status !== "Cancelled" && b.status !== "Completed"
 ) 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/pets/my`, {
+    fetch(`${process.env.VITE_API_URL}/api/pets/my`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(data => setPets(data))
 
-    fetch(`${process.env.REACT_APP_API_URL}/api/bookings/my`, {
+    fetch(`${process.env.VITE_API_URL}/api/bookings/my`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())

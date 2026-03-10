@@ -10,10 +10,10 @@ useEffect(() => {
   const fetchData = async () => {
     try {
       const [openRes, assignedRes] = await Promise.all([
-        fetch(`${process.env.REACT_APP_API_URL}/api/bookings/open`, {
+        fetch(`${process.env.VITE_API_URL}/api/bookings/open`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch(`${process.env.REACT_APP_API_URL}/api/bookings/my-assignments`, {
+        fetch(`${process.env.VITE_API_URL}/api/bookings/my-assignments`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ])
@@ -36,7 +36,7 @@ useEffect(() => {
   const handleAccept = async (id) => {
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/bookings/${id}/accept`,
+        `${process.env.VITE_API_URL}/api/bookings/${id}/accept`,
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` }
