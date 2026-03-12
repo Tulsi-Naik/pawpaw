@@ -44,18 +44,23 @@ export default function TrackWalkPage() {
 
       if (data?.length) {
 
-        const path = data.map(p => [p.lat, p.lng])
-        setLocations(path)
+      const path = data
+  .filter(p => p.lat && p.lng)
+  .map(p => [p.lat, p.lng])
 
-        const line = turf.lineString(
-          path.map(p => [p[1], p[0]])
-        )
+setLocations(path)
 
-        const dist = turf.length(line, { units: "kilometers" })
-        setDistance(dist)
+     if (path.length > 1) {
+  const line = turf.lineString(
+    path.map(p => [p[1], p[0]])
+  )
+
+  const dist = turf.length(line, { units: "kilometers" })
+  setDistance(dist)
+}
       }
 
-    }, 5000)
+    }, 3000)
 
     return () => clearInterval(interval)
 

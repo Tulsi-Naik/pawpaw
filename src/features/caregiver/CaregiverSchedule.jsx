@@ -6,6 +6,7 @@ export default function CaregiverSchedule() {
   const token = localStorage.getItem("token")
   const [bookings, setBookings] = useState([])
   const [date, setDate] = useState(new Date())
+const [watchId, setWatchId] = useState(null)
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my-assignments`, {
@@ -28,8 +29,8 @@ export default function CaregiverSchedule() {
   }
   const startTracking = (bookingId) => {
 
-  navigator.geolocation.watchPosition(
-    async (position) => {
+const id = navigator.geolocation.watchPosition(
+      async (position) => {
 
       const lat = position.coords.latitude
       const lng = position.coords.longitude
@@ -60,6 +61,7 @@ export default function CaregiverSchedule() {
       timeout: 5000
     }
   )
+        setWatchId(id)
 
 }
 
@@ -144,9 +146,9 @@ export default function CaregiverSchedule() {
   startTracking(b._id)
 
 setBookings(prev =>
-  prev.map(b =>
-    b._id === bookingId ? { ...b, status: "InProgress" } : b
-  )
+prev.map(item =>
+  item._id === b._id ? { ...item, status: "InProgress" } : item
+)
 )}}
         className="mt-2 bg-green-500 text-white px-3 py-1 rounded"
       >
@@ -161,6 +163,9 @@ setBookings(prev =>
             method: "PUT",
             headers: { Authorization: `Bearer ${token}` }
           })
+          if (watchId) {
+  navigator.geolocation.clearWatch(watchId)
+}
           window.location.reload()
         }}
         className="mt-2 bg-blue-500 text-white px-3 py-1 rounded"

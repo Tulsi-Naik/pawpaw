@@ -119,14 +119,14 @@ const isFormValid =
       toast.error("Booking failed")
     }
   }
-  console.log({
-  selectedPet,
-  duration,
-  timeSlots,
-  date,
-  packageType,
-  recurringDays
-})
+//   console.log({
+//   selectedPet,
+//   duration,
+//   timeSlots,
+//   date,
+//   packageType,
+//   recurringDays
+// })
 
   return (
     <div className="max-w-5xl mx-auto py-16 px-6 space-y-12">
