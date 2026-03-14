@@ -27,16 +27,20 @@ const [watchId, setWatchId] = useState(null)
       return "bg-green-400 text-white rounded-full"
     }
   }
-  const startTracking = (bookingId) => {
+const startTracking = (bookingId) => {
 
-const id = navigator.geolocation.watchPosition(
-      async (position) => {
+  // stop old tracking if exists
+  if (watchId) {
+    navigator.geolocation.clearWatch(watchId)
+  }
+
+  const id = navigator.geolocation.watchPosition(
+    async (position) => {
 
       const lat = position.coords.latitude
       const lng = position.coords.longitude
 
-
-  console.log("GPS:", lat, lng)
+      console.log("GPS:", lat, lng)
 
       await fetch(`${import.meta.env.VITE_API_URL}/api/location/update`, {
         method: "POST",
@@ -52,17 +56,15 @@ const id = navigator.geolocation.watchPosition(
       })
 
     },
-    (err) => {
-      console.log("GPS error", err)
-    },
+    (err) => console.log("GPS error", err),
     {
       enableHighAccuracy: true,
       maximumAge: 0,
-      timeout: 5000
+      timeout: 10000
     }
   )
-        setWatchId(id)
 
+  setWatchId(id)
 }
 
   return (

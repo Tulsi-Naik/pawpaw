@@ -42,9 +42,9 @@ export default function TrackWalkPage() {
 
       const data = await res.json()
 
-      if (data?.length) {
+if (Array.isArray(data)) {
 
-      const path = data
+const path = data
   .filter(p => p.lat && p.lng)
   .map(p => [p.lat, p.lng])
 
