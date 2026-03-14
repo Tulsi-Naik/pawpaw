@@ -26,7 +26,7 @@ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/services?catego
 useEffect(() => {
   const fetchPets = async () => {
     const res = await axios.get(
-      "${import.meta.env.VITE_API_URL}/api/pets/my",
+      `${import.meta.env.VITE_API_URL}/api/pets/my`,
       {
         headers: { Authorization: `Bearer ${token}` }
       }

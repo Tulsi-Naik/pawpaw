@@ -43,12 +43,12 @@ const lng = position.coords.longitude
 
 if (lastLocation) {
 
-  const distance = Math.sqrt(
-    Math.pow(lat - lastLocation.lat, 2) +
-    Math.pow(lng - lastLocation.lng, 2)
-  )
+  const from = turf.point([lastLocation.lng, lastLocation.lat])
+  const to = turf.point([lng, lat])
 
-  if (distance < 0.0001) return
+  const moved = turf.distance(from, to, { units: "meters" })
+
+  if (moved < 20) return
 }
 
 setLastLocation({ lat, lng })
