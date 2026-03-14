@@ -77,120 +77,210 @@ await fetch(`${import.meta.env.VITE_API_URL}/api/location/update`, {
 
   setWatchId(id)
 }
+const getDogAge = (dob) => {
+  if (!dob) return null
 
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">
-        My Schedule 📅
-      </h1>
+  const birth = new Date(dob)
+  const today = new Date()
 
-     <Calendar
-  onChange={setDate}
-  value={date}
-  tileContent={({ date }) => {
-    const bookingsOnDay = bookings.filter(
-      b =>
-        new Date(b.date).toDateString() ===
-        date.toDateString()
-    )
+  let age = today.getFullYear() - birth.getFullYear()
+  const m = today.getMonth() - birth.getMonth()
 
-    if (bookingsOnDay.length === 0) return null
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
 
-    return (
-      <div className="flex justify-center mt-1">
-        <div
-          className={`w-2 h-2 rounded-full ${
-            bookingsOnDay.length >= 3
-              ? "bg-red-500"
-              : "bg-yellow-500"
-          }`}
-        />
-      </div>
-    )
-  }}
-/>
-<h2 className="text-xl font-bold mt-8">
-  Appointments on {date.toDateString()}
-</h2>
+  return age
+}
 
-<div className="mt-4">
-  {bookings.filter(
-    b =>
-      new Date(b.date).toDateString() ===
-      date.toDateString()
-  ).length === 0 ? (
-    <div className="bg-white p-6 rounded-xl shadow text-gray-500 text-center">
-      No appointments for this day 
-    </div>
-  ) : (
-    <div className="space-y-4">
-      {bookings
-        .filter(
+return (
+  <div>
+    <h1 className="text-3xl font-bold mb-6">
+      My Schedule 📅
+    </h1>
+
+    <Calendar
+      onChange={setDate}
+      value={date}
+      tileContent={({ date }) => {
+        const bookingsOnDay = bookings.filter(
           b =>
             new Date(b.date).toDateString() ===
             date.toDateString()
         )
-.map(b => (
-  <div
-    key={b._id}
-    className="bg-white p-4 rounded-xl shadow"
-  >
-    <p className="font-semibold">{b.pet?.name}</p>
 
-    <p>{b.timeSlot} • {b.duration} mins</p>
+        if (bookingsOnDay.length === 0) return null
 
-    <p className="text-sm text-gray-500">
-      📍 {b.pet?.owner?.city}
-    </p>
+        return (
+          <div className="flex justify-center mt-1">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                bookingsOnDay.length >= 3
+                  ? "bg-red-500"
+                  : "bg-yellow-500"
+              }`}
+            />
+          </div>
+        )
+      }}
+    />
 
-    <p className="text-sm font-semibold mt-1 capitalize">
-      {b.service?.category}
-    </p>
+    <h2 className="text-xl font-bold mt-8">
+      Appointments on {date.toDateString()}
+    </h2>
 
-    {b.status === "Accepted" && (
-      <button
-        onClick={async () => {
+    <div className="mt-4">
 
-  await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${b._id}/start`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` }
-  })
+      {bookings.filter(
+        b =>
+          new Date(b.date).toDateString() ===
+          date.toDateString()
+      ).length === 0 ? (
 
-  startTracking(b._id)
+        <div className="bg-white p-6 rounded-xl shadow text-gray-500 text-center">
+          No appointments for this day
+        </div>
 
-setBookings(prev =>
-prev.map(item =>
-  item._id === b._id ? { ...item, status: "InProgress" } : item
-)
-)}}
-        className="mt-2 bg-green-500 text-white px-3 py-1 rounded"
-      >
-        Start Job
-      </button>
-    )}
+      ) : (
 
-    {b.status === "InProgress" && (
-      <button
-        onClick={async () => {
-          await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${b._id}/complete`, {
-            method: "PUT",
-            headers: { Authorization: `Bearer ${token}` }
-          })
-          if (watchId) {
-  navigator.geolocation.clearWatch(watchId)
-}
-          window.location.reload()
-        }}
-        className="mt-2 bg-blue-500 text-white px-3 py-1 rounded"
-      >
-        Complete Job
-      </button>
-    )}
-  </div>
-))}
-    </div>
+        <div className="space-y-4">
+
+          {bookings
+            .filter(
+              b =>
+                new Date(b.date).toDateString() ===
+                date.toDateString()
+            )
+            .map(b => (
+
+              <div
+                key={b._id}
+                className="bg-white border rounded-2xl shadow-sm p-5 flex flex-col gap-3"
+              >
+
+                {/* DOG */}
+                <div>
+                 <h3 className="font-bold text-lg">
+  🐕 {b.pet?.name}
+</h3>
+
+<p className="text-sm text-gray-500">
+  {b.pet?.breed || "Unknown"}
+  {b.pet?.dateOfBirth && (
+    <> • {getDogAge(b.pet.dateOfBirth)} yrs</>
   )}
-</div>
+</p>
+                </div>
+
+                {/* JOB INFO */}
+                <div className="text-sm text-gray-700 flex flex-wrap gap-x-4 gap-y-1">
+
+                  <span>
+                    📅 {new Date(b.date).toDateString()}
+                  </span>
+
+                  <span>
+                    ⏰ {b.timeSlot}
+                  </span>
+
+                  <span>
+                    ⏱ {b.duration} mins
+                  </span>
+
+                  <span>
+                    📍 {b.pet?.owner?.city}
+                  </span>
+
+                </div>
+
+                {/* DOG NOTES */}
+                <div className="text-xs text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
+
+                  <span>
+                    ⚡ Energy {b.pet?.energyLevel ?? 3}/5
+                  </span>
+
+                  <span>
+                    🚶 Speed {b.pet?.walkSpeed ?? 3}/5
+                  </span>
+
+                  {b.pet?.allergies && (
+                    <span className="text-red-500">
+                      ⚠ {b.pet.allergies}
+                    </span>
+                  )}
+
+                  {b.pet?.fears?.length > 0 && (
+                    <span>
+                      😟 {b.pet.fears.join(", ")}
+                    </span>
+                  )}
+
+                </div>
+
+                {/* ACTION */}
+                <div className="mt-2">
+
+                  {b.status === "Accepted" && (
+                    <button
+                      onClick={async () => {
+
+                        await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${b._id}/start`, {
+                          method: "PUT",
+                          headers: { Authorization: `Bearer ${token}` }
+                        })
+
+                        startTracking(b._id)
+
+                        setBookings(prev =>
+                          prev.map(item =>
+                            item._id === b._id
+                              ? { ...item, status: "InProgress" }
+                              : item
+                          )
+                        )
+
+                      }}
+                      className="w-full bg-green-500 text-white py-2 rounded-lg"
+                    >
+                      Start Walk
+                    </button>
+                  )}
+
+                  {b.status === "InProgress" && (
+                    <button
+                      onClick={async () => {
+
+                        await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${b._id}/complete`, {
+                          method: "PUT",
+                          headers: { Authorization: `Bearer ${token}` }
+                        })
+
+                        if (watchId) {
+                          navigator.geolocation.clearWatch(watchId)
+                        }
+
+                        window.location.reload()
+
+                      }}
+                      className="w-full bg-blue-500 text-white py-2 rounded-lg"
+                    >
+                      Complete Walk
+                    </button>
+                  )}
+
+                </div>
+
+              </div>
+
+            ))}
+
+        </div>
+
+      )}
+
     </div>
-  )
+
+  </div>
+)
 }

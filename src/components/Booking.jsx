@@ -75,13 +75,15 @@ const isFormValid =
     }
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+const handleSubmit = async (e) => {
+  e.preventDefault()
 
-    if (!isFormValid) {
-      toast.error("Please complete all required fields")
-      return
-    }
+  if (!isFormValid) {
+    toast.error("Please complete all required fields")
+    return
+  }
+
+  try {
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/create`, {
       method: "POST",
@@ -104,29 +106,32 @@ const isFormValid =
       })
     })
 
+    const data = await res.json()
+
     if (res.ok) {
+
       toast.success("Walk booked successfully 🐾")
 
-      // Reset form
       setSelectedPet(null)
       setTimeSlots([])
       setRecurringDays([])
       setDate("")
 
-      // Redirect
       navigate("/app/my-bookings")
+
     } else {
-      toast.error("Booking failed")
+
+      toast.error(data.message || "Booking failed")
+
     }
+
+  } catch (err) {
+
+    console.error(err)
+    toast.error("Something went wrong")
+
   }
-//   console.log({
-//   selectedPet,
-//   duration,
-//   timeSlots,
-//   date,
-//   packageType,
-//   recurringDays
-// })
+}
 
   return (
     <div className="max-w-5xl mx-auto py-16 px-6 space-y-12">

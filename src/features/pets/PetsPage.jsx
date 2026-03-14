@@ -16,6 +16,8 @@ export default function PetsPage() {
     name: "",
     type: "Dog",
     breed: "",
+     dateOfBirth: "",
+     size: "",
     energyLevel: 3,
     friendliness: 3,
     anxietyLevel: 2,
@@ -111,6 +113,8 @@ if (res.ok) {
       name: pet.name || "",
       type: pet.type || "Dog",
       breed: pet.breed || "",
+      dateOfBirth: pet.dateOfBirth || "",
+size: pet.size || "",
       energyLevel: pet.energyLevel ?? 3,
       friendliness: pet.friendliness ?? 3,
       anxietyLevel: pet.anxietyLevel ?? 2,
@@ -161,7 +165,23 @@ if (res.ok) {
             className="w-full border p-3 rounded"
             onChange={e => setForm({ ...form, breed: e.target.value })}
           />
+<input
+  type="date"
+  value={form.dateOfBirth}
+  className="w-full border p-3 rounded"
+  onChange={e => setForm({ ...form, dateOfBirth: e.target.value })}
+/>
 
+<select
+  value={form.size}
+  className="w-full border p-3 rounded"
+  onChange={e => setForm({ ...form, size: e.target.value })}
+>
+  <option value="">Select Size</option>
+  <option value="Small">Small</option>
+  <option value="Medium">Medium</option>
+  <option value="Large">Large</option>
+</select>
           {/* ENERGY */}
 
           <div>
