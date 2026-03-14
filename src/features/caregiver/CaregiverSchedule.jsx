@@ -7,6 +7,7 @@ export default function CaregiverSchedule() {
   const [bookings, setBookings] = useState([])
   const [date, setDate] = useState(new Date())
 const [watchId, setWatchId] = useState(null)
+const [lastLocation, setLastLocation] = useState(null)
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my-assignments`, {
@@ -37,12 +38,22 @@ const startTracking = (bookingId) => {
   const id = navigator.geolocation.watchPosition(
     async (position) => {
 
-      const lat = position.coords.latitude
-      const lng = position.coords.longitude
+const lat = position.coords.latitude
+const lng = position.coords.longitude
 
-      console.log("GPS:", lat, lng)
+if (lastLocation) {
 
-      await fetch(`${import.meta.env.VITE_API_URL}/api/location/update`, {
+  const distance = Math.sqrt(
+    Math.pow(lat - lastLocation.lat, 2) +
+    Math.pow(lng - lastLocation.lng, 2)
+  )
+
+  if (distance < 0.0001) return
+}
+
+setLastLocation({ lat, lng })
+
+await fetch(`${import.meta.env.VITE_API_URL}/api/location/update`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
