@@ -33,6 +33,12 @@ export default function Login() {
 if (data.user.role === "caregiver") {
   toast.success("Login successful ")
 
+  if(user.mustChangePassword){
+  navigate("/set-password")
+}else{
+  navigate("/app/dashboard")
+}
+
   if (data.user.onboardingStatus === "pending_setup") {
     navigate("/caregiver/profile-setup")
   } else {

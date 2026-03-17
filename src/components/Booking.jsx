@@ -15,6 +15,15 @@ export default function Booking() {
   const [packageType, setPackageType] = useState("one-time")
   const [recurringDays, setRecurringDays] = useState([])
   const [date, setDate] = useState("")
+const [slotWarning, setSlotWarning] = useState(null)
+
+  const morningSlots = [
+  "5:30 AM","6:00 AM","6:30 AM","7:00 AM","7:30 AM","8:00 AM","8:30 AM"
+]
+
+const eveningSlots = [
+  "4:30 PM","5:00 PM","5:30 PM","6:00 PM","6:30 PM","7:00 PM","7:30 PM"
+]
 
   const basePrices = {
     30: 199,
@@ -59,6 +68,11 @@ const isFormValid =
     fetchData()
   }, [token])
 
+  useEffect(() => {
+  setTimeSlots([])
+  setSlotWarning(null)
+}, [duration])
+
   const toggleDay = (day) => {
     if (recurringDays.includes(day)) {
       setRecurringDays(recurringDays.filter(d => d !== day))
@@ -67,13 +81,51 @@ const isFormValid =
     }
   }
 
-  const toggleTimeSlot = (slot) => {
-    if (timeSlots.includes(slot)) {
-      setTimeSlots(timeSlots.filter(s => s !== slot))
-    } else {
-      setTimeSlots([...timeSlots, slot])
-    }
+  const convertToMinutes = (time) => {
+  const [t, period] = time.split(" ")
+  let [hours, minutes] = t.split(":").map(Number)
+
+  if (period === "PM" && hours !== 12) hours += 12
+  if (period === "AM" && hours === 12) hours = 0
+
+  return hours * 60 + minutes
+}
+
+const toggleTimeSlot = (slot) => {
+
+  setSlotWarning(null)
+
+  // allow deselect first
+  if (timeSlots.includes(slot)) {
+    setTimeSlots(timeSlots.filter(s => s !== slot))
+    return
   }
+
+  const newStart = convertToMinutes(slot)
+  const newEnd = newStart + duration
+
+  for (let selected of timeSlots) {
+
+    const selectedStart = convertToMinutes(selected)
+    const selectedEnd = selectedStart + duration
+
+    const overlap =
+      newStart < selectedEnd && newEnd > selectedStart
+
+   if (overlap) {
+  setSlotWarning(slot)
+  return
+}
+
+  }
+
+  if (timeSlots.includes(slot)) {
+    setTimeSlots(timeSlots.filter(s => s !== slot))
+  } else {
+    setTimeSlots([...timeSlots, slot])
+  }
+
+}
 
 const handleSubmit = async (e) => {
   e.preventDefault()
@@ -188,27 +240,89 @@ const handleSubmit = async (e) => {
           </div>
         </div>
 
-        {/* Multi Time Slot */}
-        <div>
-          <h2 className="font-semibold mb-4">
-            Select Time Slots (You can choose multiple)
-          </h2>
-          <div className="grid md:grid-cols-4 gap-4">
-            {["6-7 AM", "7-8 AM", "5-6 PM", "6-7 PM"].map(slot => (
-              <div
-                key={slot}
-                onClick={() => toggleTimeSlot(slot)}
-                className={`p-4 rounded-xl text-center cursor-pointer transition
-                  ${timeSlots.includes(slot)
-                    ? "bg-orange-100 border-2 border-orange-500"
-                    : "bg-white shadow-sm hover:shadow-md"}
-                `}
-              >
-                {slot}
-              </div>
-            ))}
-          </div>
-        </div>
+{/* Start Time */}
+<div>
+
+<h2 className="font-semibold mb-2">
+Select Walk Start Time
+</h2>
+
+<p className="text-sm text-gray-500 mb-4">
+Duration: {duration} minutes
+</p>
+
+{/* MORNING */}
+<div className="mb-6">
+
+<p className="text-sm font-semibold text-gray-600 mb-3">
+🌅 Morning Walks
+</p>
+
+<div className="flex flex-wrap gap-3">
+
+{morningSlots.map(slot => (
+
+<button
+type="button"
+key={slot}
+onClick={() => toggleTimeSlot(slot)}
+className={`px-4 py-2 rounded-full text-sm font-medium transition
+${timeSlots.includes(slot)
+? "bg-orange-500 text-white shadow"
+: "bg-gray-100 hover:bg-orange-100"}
+`}
+>
+{slot}
+{slotWarning === slot && (
+  <p className="text-red-500 text-xs mt-1">
+    ⚠ Overlaps with another selected walk
+  </p>
+)}
+</button>
+
+))}
+
+</div>
+
+</div>
+
+{/* EVENING */}
+<div>
+
+<p className="text-sm font-semibold text-gray-600 mb-3">
+🌇 Evening Walks
+</p>
+
+<div className="flex flex-wrap gap-3">
+
+{eveningSlots.map(slot => (
+<button
+type="button"
+key={slot}
+onClick={() => toggleTimeSlot(slot)}
+className={`px-4 py-2 rounded-full text-sm font-medium transition
+${timeSlots.includes(slot)
+? "bg-orange-500 text-white shadow"
+: "bg-gray-100 hover:bg-orange-100"}
+`}
+>
+{slot}
+
+{slotWarning === slot && (
+  <p className="text-red-500 text-xs mt-1">
+    ⚠ Overlaps with another selected walk
+  </p>
+)}
+
+</button>
+
+))}
+
+</div>
+
+</div>
+
+</div>
 
         {/* Date */}
         <div>
