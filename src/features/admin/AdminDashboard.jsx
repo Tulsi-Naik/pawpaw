@@ -11,6 +11,7 @@ export default function AdminDashboard() {
     bookings: 0,
     pending: 0
   })
+  const [revenue, setRevenue] = useState(null)
 
   const loadStats = async () => {
     try{
@@ -40,9 +41,10 @@ axios.get(`${import.meta.env.VITE_API_URL}/api/applications?status=pending`)
     }
   }
 
-  useEffect(()=>{
-    loadStats()
-  },[])
+useEffect(()=>{
+  loadStats()
+  fetchRevenue()
+},[])
 
   const cards = [
     {
@@ -70,7 +72,16 @@ axios.get(`${import.meta.env.VITE_API_URL}/api/applications?status=pending`)
       color: "bg-purple-100 text-purple-600"
     }
   ]
-
+const fetchRevenue = async () => {
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/admin/revenue`
+    )
+    setRevenue(res.data)
+  } catch {
+    toast.error("Failed to load revenue")
+  }
+}
   return (
     <div className="space-y-10">
 
@@ -102,7 +113,43 @@ axios.get(`${import.meta.env.VITE_API_URL}/api/applications?status=pending`)
                 <Icon size={22} />
               </div>
 
+              {revenue && (
+  <div className="mt-10">
+    
+    <h2 className="text-2xl font-bold mb-4">
+      Revenue Overview 💰
+    </h2>
+
+    <div className="grid md:grid-cols-3 gap-6">
+
+      <div className="bg-white p-6 rounded-2xl shadow-sm">
+        <p className="text-gray-500 text-sm">Total Revenue</p>
+        <p className="text-2xl font-bold">
+          ₹{revenue.totalRevenue}
+        </p>
+      </div>
+
+      <div className="bg-white p-6 rounded-2xl shadow-sm">
+        <p className="text-gray-500 text-sm">PawPaw Earnings</p>
+        <p className="text-2xl font-bold text-green-600">
+          ₹{revenue.platformRevenue}
+        </p>
+      </div>
+
+      <div className="bg-white p-6 rounded-2xl shadow-sm">
+        <p className="text-gray-500 text-sm">Caregiver Payout</p>
+        <p className="text-2xl font-bold">
+          ₹{revenue.caregiverPayout}
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+)}
+
             </div>
+            
           )
         })}
 

@@ -17,7 +17,8 @@ export default function CaregiverProfile() {
     availability: user?.availability || [],
     phone: user?.phone || "",
     city: user?.city || "",
-    profilePhoto: null
+    profilePhoto: null,
+    upiId: user?.upiId || "",
   })
 
   const toggleSize = (size) => {
@@ -52,6 +53,7 @@ const handleSubmit = async (e) => {
     formData.append("bio", form.bio)
     formData.append("serviceRadius", form.serviceRadius)
     formData.append("phone", form.phone)
+    formData.append("upiId", form.upiId)
     formData.append("city", form.city)
     formData.append("dogSizesHandled", JSON.stringify(form.dogSizesHandled))
     formData.append("availability", JSON.stringify(form.availability))
@@ -113,6 +115,7 @@ const handleSubmit = async (e) => {
               <h2 className="text-2xl font-bold">{user.name}</h2>
               <p className="text-gray-500">{user.city}</p>
               <p className="text-gray-500">{user.phone}</p>
+              <p className="text-gray-500">UPI: {user.upiId || "Not set"}</p>
             </div>
 
           </div>
@@ -205,6 +208,16 @@ const handleSubmit = async (e) => {
             className="w-full border p-3 rounded-lg"
           />
         </div>
+        <div>
+  <label className="font-semibold">UPI ID</label>
+  <input
+    name="upiId"
+    value={form.upiId}
+    onChange={handleChange}
+    placeholder="yourname@upi"
+    className="w-full border p-3 rounded-lg"
+  />
+</div>
 
         <div>
           <label className="font-semibold">City</label>

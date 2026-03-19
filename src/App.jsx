@@ -34,7 +34,7 @@ import PetProfilePage from "./features/pets/PetProfilePage"
 import SetPassword from "./pages/SetPassword"
 import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
-
+import CaregiverEarnings from "./features/caregiver/CaregiverEarnings"
 function Home() {
   return (
     <>
@@ -190,6 +190,7 @@ function App() {
   <Route path="schedule" element={<CaregiverSchedule />} />
   <Route path="open-requests" element={<CaregiverDashboard />} />
   <Route path="profile-setup" element={<CaregiverProfileSetup />} />
+<Route path="earnings" element={<CaregiverEarnings />} />
 </Route>
 
 <Route

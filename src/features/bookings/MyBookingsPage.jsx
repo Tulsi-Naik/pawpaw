@@ -35,6 +35,8 @@ export default function MyBookingsPage() {
     fetchBookings()
   }, [token])
 
+
+
   const handleCancel = async (id) => {
     try {
       const res = await fetch(
@@ -55,6 +57,48 @@ export default function MyBookingsPage() {
       toast.error("Cancel failed")
     }
   }
+  const handlePayment = async (booking) => {
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/payment/create-order/${booking._id}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    )
+
+    const order = await res.json()
+
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: "INR",
+      name: "PawPaw",
+      description: "Booking Payment",
+      order_id: order.id,
+
+      handler: async function (response) {
+await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`   //  important
+  },
+  body: JSON.stringify(response)
+})
+
+        toast.success("Payment successful ")
+        window.location.reload()
+      }
+    }
+
+    const rzp = new window.Razorpay(options)
+    rzp.open()
+
+  } catch (err) {
+    toast.error("Payment failed")
+  }
+}
 
   if (loading) return <div className="p-10">Loading...</div>
 
@@ -91,21 +135,33 @@ export default function MyBookingsPage() {
                   {booking.service?.category} service
                 </p>
               </div>
+<div>
+  <span
+    className={`px-3 py-1 rounded-full text-sm font-semibold
+    ${
+      booking.status === "Pending"
+        ? "bg-yellow-100 text-yellow-700"
+        : booking.status === "Accepted"
+        ? "bg-green-100 text-green-700"
+        : booking.status === "InProgress"
+        ? "bg-orange-100 text-orange-700"
+        : "bg-red-100 text-red-700"
+    }`}
+  >
+    {booking.status}
+  </span>
 
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-semibold
-                ${
-                  booking.status === "Pending"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : booking.status === "Accepted"
-                    ? "bg-green-100 text-green-700"
-                    : booking.status === "InProgress"
-                    ? "bg-orange-100 text-orange-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                {booking.status}
-              </span>
+  {booking.status === "Accepted" && booking.paymentStatus !== "Paid" && (
+    <p className="text-sm text-orange-500 mt-1">
+      Waiting for payment to confirm 🐾
+    </p>
+  )}
+  {booking.paymentStatus === "Paid" && booking.status === "Accepted" && (
+  <p className="text-sm text-green-600 mt-1">
+    Booking confirmed 🎉
+  </p>
+)}
+</div>
 
             </div>
 
@@ -117,9 +173,33 @@ export default function MyBookingsPage() {
               {booking.timeSlot} • {booking.duration} mins
             </p>
 
-            <p className="font-semibold text-orange-600">
-              ₹{booking.finalPrice}
-            </p>
+           <div>
+  <p className="font-semibold text-orange-600">
+    ₹{booking.finalPrice}
+  </p>
+
+  {booking.paymentStatus === "Paid" && (
+    <p className="text-green-600 text-sm font-semibold">
+      Payment Completed ✅
+    </p>
+  )}
+</div>
+{booking.status === "Accepted" && booking.paymentStatus !== "Paid" && (
+  <div className="mt-3 space-y-2">
+    
+   <p className="text-sm text-gray-500">
+  Almost there! Complete payment to confirm your walk 🐾
+</p>
+
+    <button
+      onClick={() => handlePayment(booking)}
+      className="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+    >
+      Pay ₹{booking.finalPrice}
+    </button>
+
+  </div>
+)}
 
             {booking.caregiver && (
               <div className="flex items-center gap-3 mt-3 border-t pt-3">
@@ -155,8 +235,8 @@ export default function MyBookingsPage() {
   </button>
 )}
 
-            {booking.status === "Pending" && (
-              <button
+{booking.status === "Pending" && booking.paymentStatus !== "Paid" && (              
+  <button
                 onClick={() => handleCancel(booking._id)}
                 className="text-red-500 font-medium"
               >
@@ -213,6 +293,7 @@ export default function MyBookingsPage() {
                 <p className="font-semibold text-gray-700">
                   ₹{booking.finalPrice}
                 </p>
+                
 
               </div>
             ))}
