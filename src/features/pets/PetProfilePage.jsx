@@ -6,8 +6,9 @@ export default function PetProfilePage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const token = localStorage.getItem("token")
-
+ 
   const [pet, setPet] = useState(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
 
@@ -22,6 +23,37 @@ export default function PetProfilePage() {
 
   }, [id, token])
 
+  const handlePhotoUpload = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append("profilePhoto", file)
+
+  setUploading(true)
+
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/pets/${pet._id}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      }
+    )
+
+    const updated = await res.json()
+    setPet(updated)
+
+  } catch {
+    alert("Upload failed")
+  }
+
+  setUploading(false)
+}
+
   if (!pet) return <div className="p-10">Loading...</div>
 
   return (
@@ -30,6 +62,25 @@ export default function PetProfilePage() {
       {/* DOG HEADER */}
 
       <div className="bg-white p-8 rounded-xl shadow">
+
+        <div className="flex flex-col items-center">
+
+  <img
+    src={pet.profilePhoto || `https://ui-avatars.com/api/?name=${pet.name}`}
+    className="w-28 h-28 rounded-full object-cover mb-3"
+  />
+
+  <label className="text-sm text-orange-500 cursor-pointer">
+    {uploading ? "Uploading..." : "Change Photo"}
+    <input
+      type="file"
+      accept="image/*"
+      onChange={handlePhotoUpload}
+      className="hidden"
+    />
+  </label>
+
+</div>
 
         <h1 className="text-3xl font-bold mb-2">
           {pet.name} 🐾

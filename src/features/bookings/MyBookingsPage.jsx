@@ -7,7 +7,7 @@ export default function MyBookingsPage() {
   const navigate = useNavigate()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
-
+  const [payingId, setPayingId] = useState(null)
   const activeBookings = bookings.filter(
     b => b.status !== "Completed"
   )
@@ -192,10 +192,14 @@ await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
 </p>
 
     <button
-      onClick={() => handlePayment(booking)}
+  onClick={() => {
+    setPayingId(booking._id)
+    handlePayment(booking)
+  }}
+  disabled={payingId === booking._id}
       className="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
     >
-      Pay ₹{booking.finalPrice}
+{payingId === booking._id ? "Processing..." : `Pay ₹${booking.finalPrice}`}
     </button>
 
   </div>

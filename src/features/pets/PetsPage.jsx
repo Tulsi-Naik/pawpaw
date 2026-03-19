@@ -25,7 +25,8 @@ export default function PetsPage() {
     allergies: "",
     medicalNotes: "",
     fears: [],
-    favoriteTreat: ""
+    favoriteTreat: "",
+    profilePhoto: null
   }
 
   const [form, setForm] = useState(emptyForm)
@@ -50,47 +51,59 @@ useEffect(() => {
   }
 }, [])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+const handlePhoto = (e) => {
+  setForm({ ...form, profilePhoto: e.target.files[0] })
+}
 
-    let res
+const handleSubmit = async (e) => {
+  e.preventDefault()
 
-    if (editingPet) {
-      res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${editingPet}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(form)
-      })
+  const formData = new FormData()
+
+  Object.keys(form).forEach(key => {
+    if (key === "fears") {
+      formData.append(key, JSON.stringify(form[key]))
     } else {
-      res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(form)
-      })
+      formData.append(key, form[key])
     }
+  })
 
-if (res.ok) {
-  toast.success(editingPet ? "Dog updated 🐶" : "Dog added 🐶")
+  let res
 
-  setShowForm(false)
-  setEditingPet(null)
-  setForm(emptyForm)
-
-  const data = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/my`, {
-    headers: { Authorization: `Bearer ${token}` }
-  }).then(r => r.json())
-
-  setPets(data)
-}else {
-      toast.error("Error saving dog")
-    }
+  if (editingPet) {
+    res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${editingPet}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
+    })
+  } else {
+    res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/add`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
+    })
   }
+
+  if (res.ok) {
+    toast.success(editingPet ? "Dog updated 🐶" : "Dog added 🐶")
+
+    setShowForm(false)
+    setEditingPet(null)
+    setForm(emptyForm)
+
+    const data = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/my`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(r => r.json())
+
+    setPets(data)
+  } else {
+    toast.error("Error saving dog")
+  }
+}
 
   const toggleFear = (fear) => {
     if (form.fears.includes(fear)) {
@@ -122,7 +135,8 @@ size: pet.size || "",
       allergies: pet.allergies || "",
       medicalNotes: pet.medicalNotes || "",
       fears: pet.fears || [],
-      favoriteTreat: pet.favoriteTreat || ""
+      favoriteTreat: pet.favoriteTreat || "",
+      profilePhoto: null
     })
 
     setShowForm(true)
@@ -358,8 +372,17 @@ size: pet.size || "",
         onClick={() => navigate(`/app/pets/${pet._id}`)}
         className="cursor-pointer"
       >
-        <h3 className="font-bold text-xl">{pet.name}</h3>
-        <p className="text-gray-500">{pet.breed}</p>
+<div className="flex items-center gap-3">
+ <img
+src={pet.profilePhoto || `https://ui-avatars.com/api/?name=${pet.name}`}
+className="w-14 h-14 rounded-full object-cover border"  
+/>
+  <div>
+    <h3 className="font-bold text-xl">{pet.name}</h3>
+    <p className="text-gray-500">{pet.breed}</p>
+    
+  </div>
+</div>
 
         <p className="mt-2 text-sm">
           ⚡ Energy: {pet.energyLevel ?? 3}/5

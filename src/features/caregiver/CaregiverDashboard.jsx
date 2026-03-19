@@ -102,9 +102,19 @@ const getDogAge = (dob) => {
   {booking.service?.category === "walking" ? "🐕 Dog Walk" : "✂️ Grooming"}
 </p>
 
-<h3 className="font-bold text-lg">
-  🐕 {booking.pet?.name}
-</h3>
+<div className="flex items-center gap-3">
+  <img
+    src={
+      booking.pet?.profilePhoto ||
+      `https://ui-avatars.com/api/?name=${booking.pet?.name}`
+    }
+    className="w-12 h-12 rounded-full object-cover border"
+  />
+
+  <h3 className="font-bold text-lg">
+    {booking.pet?.name}
+  </h3>
+</div>
 
 <p className="text-sm text-gray-600">
 Breed: {booking.pet?.breed || "Unknown"}
@@ -175,9 +185,19 @@ Breed: {booking.pet?.breed || "Unknown"}
   <div className="flex justify-between items-center">
 
     <div>
-      <h3 className="font-bold text-lg">
-        🐕 {booking.pet?.name}
-      </h3>
+   <div className="flex items-center gap-3">
+  <img
+    src={
+      booking.pet?.profilePhoto ||
+      `https://ui-avatars.com/api/?name=${booking.pet?.name}`
+    }
+    className="w-12 h-12 rounded-full object-cover border"
+  />
+
+  <h3 className="font-bold text-lg">
+    {booking.pet?.name}
+  </h3>
+</div>
 
       <p className="text-sm text-gray-500">
         {booking.pet?.breed || "Unknown"}
