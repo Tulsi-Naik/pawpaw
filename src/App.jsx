@@ -31,6 +31,9 @@ import CaregiverProfileSetup from "./features/caregiver/CaregiverProfileSetup"
 import TrackWalkPage from "./features/bookings/TrackWalkPage"
 import PetsPage from "./features/pets/PetsPage"
 import PetProfilePage from "./features/pets/PetProfilePage"
+import SetPassword from "./pages/SetPassword"
+import ForgotPassword from "./pages/ForgotPassword"
+import ResetPassword from "./pages/ResetPassword"
 
 function Home() {
   return (
@@ -101,6 +104,39 @@ function App() {
           </>
         }
       />
+
+      <Route
+  path="/forgot-password"
+  element={
+    <>
+      <Navbar />
+      <ForgotPassword />
+      <Footer />
+    </>
+  }
+/>
+
+<Route
+  path="/reset-password/:token"
+  element={
+    <>
+      <Navbar />
+      <ResetPassword />
+      <Footer />
+    </>
+  }
+/>
+<Route
+  path="/set-password"
+  element={
+    <>
+      <Navbar />
+      <SetPassword />
+      <Footer />
+    </>
+  }
+/>
+      
 
       <Route
         path="/register"

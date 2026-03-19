@@ -29,21 +29,21 @@ export default function Login() {
     if (res.ok) {
   localStorage.setItem("token", data.token)
   localStorage.setItem("user", JSON.stringify(data.user))
-
 if (data.user.role === "caregiver") {
-  toast.success("Login successful ")
 
-  if(user.mustChangePassword){
-  navigate("/set-password")
-}else{
-  navigate("/app/dashboard")
-}
+  toast.success("Login successful")
+
+  if (data.user.mustChangePassword) {
+    navigate("/set-password")
+    return
+  }
 
   if (data.user.onboardingStatus === "pending_setup") {
     navigate("/caregiver/profile-setup")
   } else {
     navigate("/caregiver/schedule")
   }
+
 } else if (data.user.role === "admin") {
     toast.success("Login successful ")
 
@@ -68,8 +68,16 @@ toast.error(data.message || "Login failed")
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <Input name="email" type="email" placeholder="Email" onChange={handleChange} />
-          <Input name="password" type="password" placeholder="Password" onChange={handleChange} />
-          <Button type="submit">Login</Button>
+<Input name="password" type="password" placeholder="Password" onChange={handleChange} />
+
+<p
+  onClick={() => navigate("/forgot-password")}
+  className="text-sm text-orange-500 cursor-pointer text-right"
+>
+  Forgot Password?
+</p>
+
+<Button type="submit">Login</Button>
         </form>
 <p className="text-center text-sm text-gray-600 mt-6">
   Don’t have an account?{" "}
@@ -80,6 +88,7 @@ toast.error(data.message || "Login failed")
     Create one
   </span>
 </p>
+
       </div>
       
     </section>

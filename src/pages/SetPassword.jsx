@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
-
+import Input from "../components/ui/Input"
 export default function SetPassword() {
 
   const user = JSON.parse(localStorage.getItem("user"))
@@ -9,6 +9,7 @@ export default function SetPassword() {
 
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -32,12 +33,22 @@ export default function SetPassword() {
       }
     )
 
-    if (res.ok) {
-      toast.success("Password updated")
-      navigate("/app/dashboard")
-    } else {
-      toast.error("Error updating password")
-    }
+   if (res.ok) {
+
+  toast.success("Password updated")
+
+  const updatedUser = {
+    ...user,
+    mustChangePassword: false
+  }
+
+  localStorage.setItem("user", JSON.stringify(updatedUser))
+
+  navigate("/caregiver/schedule")
+
+} else {
+  toast.error("Error updating password")
+}
   }
 
   return (
@@ -49,21 +60,25 @@ export default function SetPassword() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
 
-        <input
-          type="password"
-          placeholder="New Password"
-          value={password}
-          onChange={(e)=>setPassword(e.target.value)}
-          className="w-full border p-3 rounded"
-        />
+       <div className="relative">
+<Input
+  name="password"
+  type="password"
+  placeholder="New Password"
+  value={password}
+  onChange={(e)=>setPassword(e.target.value)}
+/>
+</div>
 
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirm}
-          onChange={(e)=>setConfirm(e.target.value)}
-          className="w-full border p-3 rounded"
-        />
+       <div className="relative">
+<Input
+  name="confirm"
+  type="password"
+  placeholder="Confirm Password"
+  value={confirm}
+  onChange={(e)=>setConfirm(e.target.value)}
+/>
+</div>
 
         <button
           type="submit"
