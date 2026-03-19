@@ -113,6 +113,14 @@ const fetchRevenue = async () => {
                 <Icon size={22} />
               </div>
 
+
+            </div>
+            
+          )
+        })}
+
+      </div>
+
               {revenue && (
   <div className="mt-10">
     
@@ -147,14 +155,6 @@ const fetchRevenue = async () => {
 
   </div>
 )}
-
-            </div>
-            
-          )
-        })}
-
-      </div>
-
     </div>
   )
 }
