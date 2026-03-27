@@ -83,7 +83,7 @@ PawCare is a full-stack web application where pet owners can request pet care se
 
 ### 1. Clone the repository
 
-git clone https://github.com/your-username/pawcare.git  
+git clone https://github.com/Tulsi-Naik/pawpaw.git
 cd pawcare  
 
 ---
