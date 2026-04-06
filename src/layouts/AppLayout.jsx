@@ -16,6 +16,8 @@ export default function AppLayout() {
   }
 
   const navItems = [
+        { name: "Home", path: "/app/home" },
+
     { name: "Dashboard", path: "/app/dashboard" },
     { name: "My Pets", path: "/app/pets" },
     { name: "Dog Walking", path: "/app/book" },

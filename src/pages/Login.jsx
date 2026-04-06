@@ -51,7 +51,7 @@ navigate("/admin/dashboard")
 } else {
     toast.success("Login successful ")
 
-  navigate("/app/dashboard")
+ navigate("/app/home")
 }
 } else {
 toast.error(data.message || "Login failed")

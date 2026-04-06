@@ -8,7 +8,8 @@ export default function ProfilePage() {
     name: "",
     email: "",
     phone: "",
-    city: ""
+    city: "",
+    bio: ""
   })
 
   const [pets, setPets] = useState([])
@@ -28,7 +29,8 @@ const [editingPetId, setEditingPetId] = useState(null)
           name: userData.name || "",
           email: userData.email || "",
           phone: userData.phone || "",
-          city: userData.city || ""
+          city: userData.city || "",
+          bio: userData.bio || ""
         })
 
         const petsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/my`, {
@@ -58,7 +60,8 @@ const [editingPetId, setEditingPetId] = useState(null)
         },
         body: JSON.stringify({
           phone: form.phone,
-          city: form.city
+          city: form.city,
+           bio: form.bio
         })
       })
 
@@ -195,6 +198,13 @@ const handlePetUpdate = async (pet) => {
         </p>
       </div>
 
+      <div className="bg-white p-5 rounded-2xl shadow-sm">
+  <p className="text-sm text-gray-400">About Me</p>
+  <p className="font-semibold text-lg">
+    {form.bio || "Not added"}
+  </p>
+</div>
+
     </div>
   ) : (
     /* EDIT MODE */
@@ -225,7 +235,12 @@ const handlePetUpdate = async (pet) => {
         placeholder="City"
         className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-orange-200"
       />
-
+<textarea
+  value={form.bio}
+  onChange={(e) => setForm({ ...form, bio: e.target.value })}
+  placeholder="Tell why you love dogs / your experience..."
+  className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-orange-200"
+/>
       <button
         onClick={() => {
           handleUserSave()

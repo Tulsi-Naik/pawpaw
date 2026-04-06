@@ -35,6 +35,14 @@ import SetPassword from "./pages/SetPassword"
 import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
 import CaregiverEarnings from "./features/caregiver/CaregiverEarnings"
+import AdminCaregivers from "./features/admin/AdminCaregivers"
+import AdminBookings from "./features/admin/AdminBookings"
+import AdminUsers from "./features/admin/AdminUsers"
+import Adopt from "./features/adoption/Adopt"
+import HomeFeed from "./features/dashboard/HomeFeed"
+import CreateListing from "./features/adoption/CreateListing"
+import MyListings from "./features/adoption/MyListings"
+import MyRequests from "./features/adoption/MyRequests"
 function Home() {
   return (
     <>
@@ -177,6 +185,11 @@ function App() {
 <Route path="my-bookings" element={<MyBookingsPage />} />
 <Route path="track/:bookingId" element={<TrackWalkPage />} />
 <Route path="grooming" element={<GroomingPage />} />
+<Route path="adopt" element={<Adopt />} />
+<Route path="home" element={<HomeFeed />} />
+<Route path="adopt/create" element={<CreateListing />} />
+<Route path="adopt/my-listings" element={<MyListings />} />
+<Route path="adopt/my-requests" element={<MyRequests />} />
       </Route>
       {/* CAREGIVER AREA */}
 <Route
@@ -203,6 +216,9 @@ function App() {
 >
   <Route path="dashboard" element={<AdminDashboard />} />
   <Route path="applications" element={<AdminApplications />} />
+  <Route path="caregivers" element={<AdminCaregivers />} />
+  <Route path="bookings" element={<AdminBookings />} />
+  <Route path="users" element={<AdminUsers />} />
 </Route>
     </Routes>
   )

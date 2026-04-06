@@ -184,6 +184,26 @@ const handleSubmit = async (e) => {
 
   }
 }
+if (pets.length === 0) {
+  return (
+    <div className="max-w-3xl mx-auto py-20 text-center">
+      <h2 className="text-2xl font-bold mb-4">
+        No pets added yet 🐶
+      </h2>
+
+      <p className="text-gray-600 mb-6">
+        Add your dog to start booking walks & grooming
+      </p>
+
+      <button
+        onClick={() => navigate("/app/pets")}
+        className="bg-orange-500 text-white px-6 py-3 rounded-xl"
+      >
+        Add Pet
+      </button>
+    </div>
+  )
+}
 
   return (
     <div className="max-w-5xl mx-auto py-16 px-6 space-y-12">

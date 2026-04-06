@@ -24,6 +24,8 @@ export default function DashboardPage() {
       .then(data => setBookings(data))
   }, [])
 
+
+
   return (
     <div className="p-8">
 
@@ -41,7 +43,14 @@ export default function DashboardPage() {
       {/* Dogs */}
       <h2 className="text-xl font-bold mb-4">Your Dogs</h2>
       <div className="grid md:grid-cols-3 gap-6 mb-12">
-        {pets.map(pet => (
+
+  {pets.length === 0 && (
+    <p className="text-gray-500 col-span-3">
+      No pets yet. Add one 🐶
+    </p>
+  )}
+
+  {pets.map(pet => (
           <div key={pet._id} className="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
             <h3 className="font-semibold text-lg">{pet.name}</h3>
             <p className="text-gray-500">{pet.breed}</p>
