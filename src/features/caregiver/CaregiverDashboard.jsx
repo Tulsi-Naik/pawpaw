@@ -5,13 +5,14 @@ export default function CaregiverDashboard() {
   const token = localStorage.getItem("token")
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [scope, setScope] = useState("city")
 const user = JSON.parse(localStorage.getItem("user"))
 useEffect(() => {
   const fetchData = async () => {
     try {
       const [openRes, assignedRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL}/api/bookings/open`, {
-          headers: { Authorization: `Bearer ${token}` }
+fetch(`${import.meta.env.VITE_API_URL}/api/bookings/open?scope=${scope}`, {
+            headers: { Authorization: `Bearer ${token}` }
         }),
         fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my-assignments`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -31,7 +32,7 @@ useEffect(() => {
   }
 
   fetchData()
-}, [token])
+}, [token, scope])
 
 const getDogAge = (dob) => {
   if (!dob) return null
@@ -74,6 +75,11 @@ const getDogAge = (dob) => {
   }
 
   if (loading) return <div className="p-10">Loading...</div>
+  const sortedBookings = [...bookings].sort((a, b) => {
+  if (a.pet?.owner?.city === user.city) return -1
+  if (b.pet?.owner?.city === user.city) return 1
+  return 0
+})
 
   return (
     <div className="max-w-6xl mx-auto py-16 px-6 space-y-10">
@@ -84,15 +90,15 @@ const getDogAge = (dob) => {
     : "Walker Dashboard 🐕"}
 </h1>
 
-      {/* ✅ Accepted Walks */}
+      {/*  Accepted Walks */}
 <h2 className="text-2xl font-bold">
   {user?.skills?.includes("grooming")
     ? "My Accepted Grooming Jobs"
     : "My Accepted Walks"}
 </h2>
       <div className="grid md:grid-cols-2 gap-6">
-        {bookings
-          .filter(b => b.status === "Accepted")
+        {sortedBookings.filter(b => b.status === "Accepted")
+      
           .map(booking => (
             <div
               key={booking._id}
@@ -166,15 +172,45 @@ Breed: {booking.pet?.breed || "Unknown"}
           ))}
       </div>
 
-      {/* ✅ Pending Requests */}
-<h2 className="text-2xl font-bold mt-12">
-  {user?.skills?.includes("grooming")
-    ? "Open Grooming Requests"
-    : "Open Walk Requests"}
-</h2>
+{/*  Pending Requests */}
+
+<div className="mt-12 space-y-3">
+
+  {/* FILTER BUTTONS */}
+  <div className="flex gap-3">
+    <button
+      onClick={() => setScope("city")}
+      className={`px-4 py-2 rounded-lg ${
+        scope === "city"
+          ? "bg-orange-500 text-white"
+          : "bg-gray-200"
+      }`}
+    >
+      Same City
+    </button>
+
+    <button
+      onClick={() => setScope("all")}
+      className={`px-4 py-2 rounded-lg ${
+        scope === "all"
+          ? "bg-orange-500 text-white"
+          : "bg-gray-200"
+      }`}
+    >
+      All Jobs
+    </button>
+  </div>
+
+  {/* HEADING */}
+  <h2 className="text-2xl font-bold">
+    {user?.skills?.includes("grooming")
+      ? "Open Grooming Requests"
+      : "Open Walk Requests"}
+  </h2>
+
+</div>
       <div className="grid md:grid-cols-2 gap-6">
-        {bookings
-          .filter(b => b.status === "Pending")
+        {sortedBookings.filter(b => b.status === "Pending")
           .map(booking => (
 <div
   key={booking._id}
@@ -230,9 +266,17 @@ Breed: {booking.pet?.breed || "Unknown"}
       ⏱ {booking.duration} mins
     </span>
 
-    <span>
-      📍 {booking.pet?.owner?.city}
+  <div className="flex items-center gap-2">
+  <span>
+    📍 {booking.pet?.owner?.city}
+  </span>
+
+  {booking.pet?.owner?.city !== user.city && (
+    <span className="text-xs text-gray-400">
+      Other City
     </span>
+  )}
+</div>
 
   </div>
 
