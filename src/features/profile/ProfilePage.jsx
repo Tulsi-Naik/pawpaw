@@ -70,18 +70,33 @@ const [editingPetId, setEditingPetId] = useState(null)
       toast.error("Error updating profile")
     }
   }
+  localStorage.setItem("user", JSON.stringify({
+  ...JSON.parse(localStorage.getItem("user")),
+  phone: form.phone,
+  city: form.city,
+  bio: form.bio
+}))
 
   // Update pet
 const handlePetUpdate = async (pet) => {
   try {
 
+    const formData = new FormData()
+
+    Object.keys(pet).forEach(key => {
+      if (key === "fears") {
+        formData.append(key, JSON.stringify(pet[key]))
+      } else {
+        formData.append(key, pet[key])
+      }
+    })
+
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${pet._id}`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify(pet)
+      body: formData
     })
 
     const updatedPet = await res.json()

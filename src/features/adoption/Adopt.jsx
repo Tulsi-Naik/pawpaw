@@ -15,7 +15,9 @@ export default function Adopt() {
   const [requestedIds, setRequestedIds] = useState([])
 
   const [loading, setLoading] = useState(true)
-
+const [showModal, setShowModal] = useState(false)
+const [selectedListing, setSelectedListing] = useState(null)
+const [message, setMessage] = useState("")
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -50,25 +52,32 @@ export default function Adopt() {
     fetchData()
   }, [])
 
-const handleRequest = async (listingId) => {
+const handleRequest = async () => {
+  if (!message.trim()) {
+    toast.error("Please enter a reason")
+    return
+  }
+
   try {
-
-    const message = prompt("Why do you want to adopt this dog?")
-
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/adoption/request`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({ listingId, message })
+      body: JSON.stringify({
+        listingId: selectedListing,
+        message
+      })
     })
 
     const data = await res.json()
 
     if (res.ok) {
       toast.success("Request sent 🐶")
-      setRequestedIds(prev => [...prev, listingId])
+      setRequestedIds(prev => [...prev, selectedListing])
+      setShowModal(false)
+      setMessage("")
     } else {
       toast.error(data.message || "Failed")
     }
@@ -286,8 +295,44 @@ const isProfileComplete = user?.phone && user?.city && user?.bio
             ))
           )}
         </div>
-      )}
+      )}{showModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+    <div className="bg-white p-6 rounded-2xl w-full max-w-md">
+
+      <h2 className="text-lg font-semibold mb-3">
+        Why do you want to adopt?
+      </h2>
+
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        className="w-full border rounded-xl p-3 h-24"
+        placeholder="Tell the owner why you'd be a good match..."
+      />
+
+      <div className="flex justify-end gap-2 mt-4">
+        <button
+          onClick={() => setShowModal(false)}
+          className="px-4 py-2 bg-gray-200 rounded-lg"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleRequest}
+          className="px-4 py-2 bg-orange-500 text-white rounded-lg"
+        >
+          Send Request
+        </button>
+      </div>
 
     </div>
+
+  </div>
+)}
+
+    </div>
+    
   )
 }
