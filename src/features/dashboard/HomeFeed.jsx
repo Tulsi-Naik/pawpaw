@@ -12,7 +12,7 @@ export default function HomeFeed() {
   const [bookings, setBookings] = useState([])
   const [tip, setTip] = useState("")
   const [showRating, setShowRating] = useState(null)
-
+const [todayBlog, setTodayBlog] = useState(null)
   const tips = [
     "🐶 Walk your dog after 30 mins of meals",
     "💧 Always carry water on walks",
@@ -24,6 +24,13 @@ export default function HomeFeed() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+
+        const blogRes = await fetch(`${import.meta.env.VITE_API_URL}/api/blogs`)
+const blogData = await blogRes.json()
+
+if (blogData.length > 0) {
+  setTodayBlog(blogData[0]) // latest blog
+}
         const [listRes, bookingRes] = await Promise.all([
           fetch(`${import.meta.env.VITE_API_URL}/api/adoption`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -108,6 +115,40 @@ export default function HomeFeed() {
           </div>
         </div>
       )}
+
+      {todayBlog && (
+  <div
+    onClick={() => navigate(`/blog/${todayBlog.slug}`)}
+    className="bg-white rounded-2xl p-6 shadow cursor-pointer hover:shadow-md transition"
+  >
+    <h2 className="font-bold text-lg mb-3">
+      📖 Today’s Tip
+    </h2>
+
+    <div className="flex gap-4 items-center">
+
+      <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-200">
+        {todayBlog.image && (
+          <img
+            src={todayBlog.image}
+            className="w-full h-full object-cover"
+          />
+        )}
+      </div>
+
+      <div>
+        <p className="font-semibold line-clamp-2">
+          {todayBlog.title}
+        </p>
+
+        <p className="text-sm text-gray-500">
+          {todayBlog.category}
+        </p>
+      </div>
+
+    </div>
+  </div>
+)}
 
       {/* Rate Last Walk */}
       {showRating && (

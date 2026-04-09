@@ -25,6 +25,9 @@ export default function Navbar() {
          <Link to="/services" className="hover:text-orange-500 transition">
   Services
 </Link>
+<Link to="/blog" className="hover:text-orange-500 transition">
+  Blog
+</Link>
 
           <Link to="/about" className="hover:text-orange-500 transition">
             About

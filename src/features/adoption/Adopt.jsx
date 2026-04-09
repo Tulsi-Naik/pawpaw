@@ -190,7 +190,11 @@ const isProfileComplete = user?.phone && user?.city && user?.bio
   ) : (
     <button
       disabled={isRequested}
-      onClick={() => handleRequest(item._id)}
+      onClick={() => {
+  setSelectedListing(item._id)
+  setMessage("")
+  setShowModal(true)
+}}
       className={`mt-3 w-full py-2 rounded
         ${isRequested
           ? "bg-gray-300"
@@ -319,12 +323,17 @@ const isProfileComplete = user?.phone && user?.city && user?.bio
           Cancel
         </button>
 
-        <button
-          onClick={handleRequest}
-          className="px-4 py-2 bg-orange-500 text-white rounded-lg"
-        >
-          Send Request
-        </button>
+       <button
+  onClick={handleRequest}
+  disabled={!message.trim()}
+  className={`px-4 py-2 rounded-lg ${
+    message.trim()
+      ? "bg-orange-500 text-white"
+      : "bg-gray-300 text-gray-500"
+  }`}
+>
+  Send Request
+</button>
       </div>
 
     </div>

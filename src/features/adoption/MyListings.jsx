@@ -7,16 +7,25 @@ export default function MyListings() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/adoption/my-listings`, {
+ useEffect(() => {
+  const fetchData = async () => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/adoption/my-listings`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
-      .then(res => {
-        setData(res)
-        setLoading(false)
-      })
-  }, [])
+
+    const json = await res.json()
+
+    // 🔥 FORCE CLEAN COPY
+    const clean = JSON.parse(JSON.stringify(json))
+
+    console.log("CLEAN DATA:", clean)
+
+    setData(clean)
+    setLoading(false)
+  }
+
+  fetchData()
+}, [token])
 
   const handleAction = async (requestId, action) => {
     try {
@@ -106,82 +115,54 @@ export default function MyListings() {
                     No requests yet
                   </p>
                 ) : (
-                  <>
-                    {requests.map(req => {
+                  requests.map(req => (
+                    <div
+                      key={req._id}
+                      className="border rounded-xl p-4 bg-gray-50"
+                    >
 
-                      console.log(req.requester)
+                      {/* Name + City */}
+                      <p className="font-semibold text-lg">
+                        {req.requester?.name}
+                      </p>
 
-                      return (
-                        <div
-                          key={req._id}
-                          className="bg-gray-50 border rounded-2xl p-4 flex gap-4"
-                        >
+                      <p className="text-sm text-gray-500">
+                        📍 {req.requester?.city}
+                      </p>
 
-                          {/* Avatar */}
-                          <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden">
-                            {req.requester?.profilePhoto ? (
-                              <img
-                                src={req.requester.profilePhoto}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                👤
-                              </div>
-                            )}
-                          </div>
+                      {/* BIO */}
+                      <p className="text-sm mt-3 text-gray-700 bg-white p-3 rounded-lg border">
+                        🧑‍🦱 <span className="font-medium">About:</span>{" "}
+                        {req.requester?.bio || "No bio provided"}
+                      </p>
 
-                          {/* Content */}
-                          <div className="flex-1">
+                      {/* MESSAGE */}
+                      <p className="text-sm mt-2 text-gray-700 bg-white p-3 rounded-lg border">
+                        💬 <span className="font-medium">Why adopt:</span>{" "}
+                        {req.message || "No message provided"}
+                      </p>
 
-                            <div>
-                              <p className="font-semibold">
-                                {req.requester?.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                📍 {req.requester?.city}
-                              </p>
-                            </div>
+                      {/* Actions */}
+                      {req.status === "pending" && (
+                        <div className="flex gap-2 mt-4 justify-end">
+                          <button
+                            onClick={() => handleAction(req._id, "approve")}
+                            className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-sm"
+                          >
+                            Approve
+                          </button>
 
-                            {/* Bio */}
-                            {req.requester?.bio && (
-                              <p className="text-sm mt-3 text-gray-700 bg-white p-3 rounded-lg border">
-                                🧑‍🦱 <span className="font-medium">About:</span> {req.requester.bio}
-                              </p>
-                            )}
-
-                            {/* Message */}
-                            {req.message && (
-                              <p className="text-sm mt-2 text-gray-700 bg-white p-3 rounded-lg border">
-                                💬 <span className="font-medium">Why adopt:</span> {req.message}
-                              </p>
-                            )}
-
-                            {/* Actions */}
-                            {req.status === "pending" && (
-                              <div className="flex gap-2 mt-4 justify-end">
-                                <button
-                                  onClick={() => handleAction(req._id, "approve")}
-                                  className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-sm"
-                                >
-                                  Approve
-                                </button>
-
-                                <button
-                                  onClick={() => handleAction(req._id, "reject")}
-                                  className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-sm"
-                                >
-                                  Reject
-                                </button>
-                              </div>
-                            )}
-
-                          </div>
-
+                          <button
+                            onClick={() => handleAction(req._id, "reject")}
+                            className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-sm"
+                          >
+                            Reject
+                          </button>
                         </div>
-                      )
-                    })}
-                  </>
+                      )}
+
+                    </div>
+                  ))
                 )}
 
               </div>

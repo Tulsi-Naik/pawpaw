@@ -43,12 +43,18 @@ import HomeFeed from "./features/dashboard/HomeFeed"
 import CreateListing from "./features/adoption/CreateListing"
 import MyListings from "./features/adoption/MyListings"
 import MyRequests from "./features/adoption/MyRequests"
+import BlogListPage from "./features/blog/BlogListPage"
+import BlogDetailPage from "./features/blog/BlogDetailPage"
+import BlogPreview from "./components/BlogPreview"
+import AdminAddBlog from "./features/admin/AdminAddBlog"
+import AdminBlogs from "./features/admin/AdminBlogs"
+import AdminEditBlog from "./features/admin/AdminEditBlog"
 function Home() {
   return (
     <>
       <Hero />
      <ServicesPreview />
-      
+      <BlogPreview /> 
       <Stats />
       <BecomeCaregiver />
       <Testimonials />
@@ -98,6 +104,27 @@ function App() {
     <>
       <Navbar />
       <ContactPage />
+      <Footer />
+    </>
+  }
+/>
+<Route
+  path="/blog"
+  element={
+    <>
+      <Navbar />
+      <BlogListPage />
+      <Footer />
+    </>
+  }
+/>
+
+<Route
+  path="/blog/:slug"
+  element={
+    <>
+      <Navbar />
+      <BlogDetailPage />
       <Footer />
     </>
   }
@@ -219,6 +246,9 @@ function App() {
   <Route path="caregivers" element={<AdminCaregivers />} />
   <Route path="bookings" element={<AdminBookings />} />
   <Route path="users" element={<AdminUsers />} />
+  <Route path="blogs" element={<AdminBlogs />} />
+    <Route path="blogs/create" element={<AdminAddBlog />} />
+<Route path="blogs/edit/:id" element={<AdminEditBlog />} />
 </Route>
     </Routes>
   )
