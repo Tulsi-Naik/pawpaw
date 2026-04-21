@@ -239,12 +239,18 @@ const isProfileComplete = user?.phone && user?.city && user?.bio
                 {item.requests.map(r => (
                   <div key={r._id} className="flex justify-between border p-2 rounded mb-2">
 
-                    <div>
-                      <p>{r.requester?.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {r.requester?.city}
-                      </p>
-                    </div>
+                  <div>
+  <p className="font-semibold">{r.requester?.name}</p>
+  <p className="text-sm text-gray-500">{r.requester?.city}</p>
+
+  <p className="text-sm mt-1 text-gray-700">
+    Bio: {r.requester?.bio || "No bio"}
+  </p>
+
+  <p className="text-sm italic text-orange-600">
+    "{r.message || "No message"}"
+  </p>
+</div>
 
                     {r.status === "pending" ? (
                       <div className="flex gap-2">

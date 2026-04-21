@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { Footprints, Scissors, Heart } from "lucide-react"
+import { PawPrint, Scissors, Heart } from "lucide-react"
 
 export default function Services() {
   const user = JSON.parse(localStorage.getItem("user"))
@@ -7,35 +7,34 @@ export default function Services() {
 
   const services = [
     {
-      icon: <Footprints size={42} />,
+      icon: <PawPrint size={42} />,
       title: "Dog Walking",
-      desc: "Zoomies out. Calm dog back."
+      desc: "Daily walks handled by trusted caregivers."
     },
     {
       icon: <Heart size={42} />,
       title: "Adoption",
-      desc: "Find your forever chaos partner."
+      desc: "Connect with dogs looking for a new home."
     },
     {
       icon: <Scissors size={42} />,
       title: "Grooming",
-      desc: "From muddy to majestic."
+      desc: "Professional grooming at your doorstep."
     }
   ]
 
   return (
-    <section className="py-24 px-6 bg-linear-to-br from-yellow-50 via-white to-orange-50">
+    <section className="py-24 px-6 bg-gradient-to-br from-yellow-50 via-white to-orange-50">
 
       <div className="max-w-6xl mx-auto">
 
         {/* HERO */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-24">
           <h1 className="text-5xl font-extrabold mb-6 leading-tight">
-            Life gets busy.
-            <span className="text-orange-500"> Your dog shouldn't suffer.</span>
+            Simple care for your dog.
           </h1>
           <p className="text-lg text-gray-600">
-            Walks, grooming & adoption — all handled in a few clicks.
+            Book services, track activity, and manage everything in one place.
           </p>
         </div>
 
@@ -68,103 +67,135 @@ export default function Services() {
           ))}
         </div>
 
-        {/* ---------------- WALKING ---------------- */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-32">
-
+        {/* WALKING */}
+        <div className="grid md:grid-cols-2 gap-16 items-center mb-32">
           <img
-            src="https://images.unsplash.com/photo-1729175235373-cc6cc675561e?mark=https:%2F%2Fimages.unsplash.com%2Fopengraph%2Flogo.png&mark-w=64&mark-align=top%2Cleft&mark-pad=50&h=630&w=1200&crop=faces%2Cedges&blend-w=1&blend=000000&blend-mode=normal&blend-alpha=10&auto=format&fit=crop&q=60&ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzQ3MzMyMDYyfA&ixlib=rb-4.1.0"
+            src="https://images.unsplash.com/photo-1729175235373-cc6cc675561e"
             className="rounded-3xl shadow-lg"
           />
 
           <div>
             <h2 className="text-4xl font-extrabold mb-4">
-              Walks your dog deserves 🐕
+              Dog Walking
             </h2>
 
-            <p className="text-gray-600 mb-6">
-              You book. We walk. Your dog comes back happy (and tired 😌).
+            <p className="text-gray-600 mb-10">
+              Book a walk in seconds and track it live.
             </p>
 
-            <ul className="space-y-3 text-gray-700 mb-6">
-              <li>👉 Select your dog</li>
-              <li>👉 Choose time slot</li>
-              <li>👉 Book instantly</li>
-              <li>👉 Caregiver accepts</li>
-              <li>👉 Track live walk 📍</li>
-              <li>👉 Cancel anytime if plans change</li>
-            </ul>
+            <div className="relative border-l-2 border-orange-200 pl-6 space-y-8">
+              <div>
+                <div className="absolute -left-3 w-6 h-6 bg-orange-500 rounded-full"></div>
+                <h4 className="font-semibold">Book</h4>
+                <p className="text-gray-600 text-sm">Select dog and time slot</p>
+              </div>
+
+              <div>
+                <div className="absolute -left-3 w-6 h-6 bg-orange-500 rounded-full"></div>
+                <h4 className="font-semibold">Confirm</h4>
+                <p className="text-gray-600 text-sm">Caregiver accepts request</p>
+              </div>
+
+              <div>
+                <div className="absolute -left-3 w-6 h-6 bg-orange-500 rounded-full"></div>
+                <h4 className="font-semibold">Track</h4>
+                <p className="text-gray-600 text-sm">Follow the walk live</p>
+              </div>
+            </div>
 
             <Link
               to={bookLink}
-              className="bg-orange-500 text-white px-6 py-3 rounded-full font-semibold"
+              className="inline-block mt-10 bg-orange-500 text-white px-6 py-3 rounded-full font-semibold"
             >
-              Book a Walk →
+              Book Walk →
             </Link>
           </div>
         </div>
 
-        {/* ---------------- ADOPTION ---------------- */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-32">
-
+        {/* ADOPTION */}
+        <div className="grid md:grid-cols-2 gap-16 items-center mb-32">
           <div>
             <h2 className="text-4xl font-extrabold mb-4">
-              Meet your new best friend ❤️
+              Adoption
             </h2>
 
-            <p className="text-gray-600 mb-6">
-              No dog? Perfect. Start your journey here 🐶
+            <p className="text-gray-600 mb-10">
+              Connect directly with owners and adopt responsibly.
             </p>
 
-            <ul className="space-y-3 text-gray-700 mb-6">
-              <li>👉 Browse available dogs</li>
-              <li>👉 Send adoption request</li>
-              <li>👉 Owner reviews & connects</li>
-              <li>👉 Safe and simple process</li>
-              <li>👉 First-time owners welcome 🎉</li>
-            </ul>
+            <div className="relative border-l-2 border-orange-200 pl-6 space-y-8">
+              <div>
+                <div className="absolute -left-3 w-6 h-6 bg-orange-500 rounded-full"></div>
+                <h4 className="font-semibold">Browse</h4>
+                <p className="text-gray-600 text-sm">View available dogs</p>
+              </div>
+
+              <div>
+                <div className="absolute -left-3 w-6 h-6 bg-orange-500 rounded-full"></div>
+                <h4 className="font-semibold">Request</h4>
+                <p className="text-gray-600 text-sm">Send request</p>
+              </div>
+
+              <div>
+                <div className="absolute -left-3 w-6 h-6 bg-orange-500 rounded-full"></div>
+                <h4 className="font-semibold">Connect</h4>
+                <p className="text-gray-600 text-sm">Finalize with owner</p>
+              </div>
+            </div>
 
             <Link
               to="/services/adoption"
-              className="bg-orange-500 text-white px-6 py-3 rounded-full font-semibold"
+              className="inline-block mt-10 bg-orange-500 text-white px-6 py-3 rounded-full font-semibold"
             >
-              Explore Adoption →
+              Explore →
             </Link>
           </div>
 
           <img
-            src="https://plus.unsplash.com/premium_photo-1661503267592-56e6bfbdc6e4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8ZG9nJTIwYWRvcHRpb258ZW58MHx8MHx8&w=1000&q=80"
+            src="https://plus.unsplash.com/premium_photo-1661503267592-56e6bfbdc6e4"
             className="rounded-3xl shadow-lg"
           />
         </div>
 
-        {/* ---------------- GROOMING ---------------- */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-32">
-
+        {/* GROOMING */}
+        <div className="grid md:grid-cols-2 gap-16 items-center mb-32">
           <img
-            src="https://images.unsplash.com/photo-1611173622933-91942d394b04?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8ZG9nJTIwZ3Jvb21pbmd8ZW58MHx8MHx8fDA%3DS"
+            src="https://images.unsplash.com/photo-1611173622933-91942d394b04"
             className="rounded-3xl shadow-lg"
           />
 
           <div>
             <h2 className="text-4xl font-extrabold mb-4">
-              Spa day, but at home ✂️
+              Grooming
             </h2>
 
-            <p className="text-gray-600 mb-6">
-              No stress. No travel. Just a fresh, fluffy dog.
+            <p className="text-gray-600 mb-10">
+              Book professional grooming at home.
             </p>
 
-            <ul className="space-y-3 text-gray-700 mb-6">
-              <li>👉 Select your dog</li>
-              <li>👉 Choose time slot</li>
-              <li>👉 Book grooming</li>
-              <li>👉 Caregiver accepts</li>
-              <li>👉 Sit back & relax 😎</li>
-            </ul>
+            <div className="relative border-l-2 border-orange-200 pl-6 space-y-8">
+              <div>
+                <div className="absolute -left-3 w-6 h-6 bg-orange-500 rounded-full"></div>
+                <h4 className="font-semibold">Schedule</h4>
+                <p className="text-gray-600 text-sm">Choose time</p>
+              </div>
+
+              <div>
+                <div className="absolute -left-3 w-6 h-6 bg-orange-500 rounded-full"></div>
+                <h4 className="font-semibold">Confirm</h4>
+                <p className="text-gray-600 text-sm">Caregiver assigned</p>
+              </div>
+
+              <div>
+                <div className="absolute -left-3 w-6 h-6 bg-orange-500 rounded-full"></div>
+                <h4 className="font-semibold">Done</h4>
+                <p className="text-gray-600 text-sm">Grooming completed</p>
+              </div>
+            </div>
 
             <Link
               to={bookLink}
-              className="bg-orange-500 text-white px-6 py-3 rounded-full font-semibold"
+              className="inline-block mt-10 bg-orange-500 text-white px-6 py-3 rounded-full font-semibold"
             >
               Book Grooming →
             </Link>
@@ -173,8 +204,8 @@ export default function Services() {
 
       </div>
 
-      {/* TRUST */}
-      <div className="max-w-6xl mx-auto mt-20 bg-linear-to-r from-orange-500 to-yellow-400 rounded-3xl p-16 text-white text-center">
+      {/* WHY */}
+      <div className="max-w-6xl mx-auto mt-24 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-3xl px-8 py-16 text-white text-center">
         <h2 className="text-4xl font-extrabold mb-12">
           Why PawPaw?
         </h2>
@@ -187,25 +218,25 @@ export default function Services() {
 
           <div>
             <div className="text-5xl font-black mb-3">₹0</div>
-            <p>Hidden charges</p>
+            <p>No hidden charges</p>
           </div>
 
           <div>
             <div className="text-5xl font-black mb-3">24/7</div>
-            <p>Support (we got you)</p>
+            <p>Support available</p>
           </div>
         </div>
       </div>
 
       {/* CTA */}
-      <div className="text-center mt-20">
-        <h2 className="text-3xl font-bold mb-4">
-          Ready to make your dog happier?
+      <div className="text-center mt-24">
+        <h2 className="text-3xl font-bold mb-6">
+          Ready to get started?
         </h2>
 
         <Link
           to={bookLink}
-          className="bg-orange-500 text-white px-8 py-4 rounded-full font-semibold hover:bg-orange-600 transition"
+          className="inline-block bg-orange-500 text-white px-10 py-4 rounded-full font-semibold hover:bg-orange-600 transition"
         >
           Get Started →
         </Link>

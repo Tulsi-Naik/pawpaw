@@ -9,13 +9,15 @@ export default function ProfilePage() {
     email: "",
     phone: "",
     city: "",
-    bio: ""
+    bio: "",
+    profilePhoto: null // file OR url
   })
 
   const [pets, setPets] = useState([])
   const [loading, setLoading] = useState(true)
-const [editProfile, setEditProfile] = useState(false)
-const [editingPetId, setEditingPetId] = useState(null)
+  const [editProfile, setEditProfile] = useState(false)
+  const [editingPetId, setEditingPetId] = useState(null)
+
   // Fetch user + pets
   useEffect(() => {
     const fetchData = async () => {
@@ -30,7 +32,8 @@ const [editingPetId, setEditingPetId] = useState(null)
           email: userData.email || "",
           phone: userData.phone || "",
           city: userData.city || "",
-          bio: userData.bio || ""
+          bio: userData.bio || "",
+          profilePhoto: userData.profilePhoto || "" // url initially
         })
 
         const petsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/my`, {
@@ -39,7 +42,7 @@ const [editingPetId, setEditingPetId] = useState(null)
         const petsData = await petsRes.json()
         setPets(petsData)
 
-      } catch (err) {
+      } catch {
         toast.error("Error loading profile")
       }
 
@@ -49,72 +52,77 @@ const [editingPetId, setEditingPetId] = useState(null)
     fetchData()
   }, [token])
 
-  // Save personal info
+  // 🔥 SAVE PROFILE (FormData like caregiver)
   const handleUserSave = async () => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/users/update`, {
+      const formData = new FormData()
+
+      formData.append("phone", form.phone)
+      formData.append("city", form.city)
+      formData.append("bio", form.bio)
+
+      // only append if file selected
+      if (form.profilePhoto && typeof form.profilePhoto !== "string") {
+        formData.append("profilePhoto", form.profilePhoto)
+      }
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/update`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({
-          phone: form.phone,
-          city: form.city,
-           bio: form.bio
-        })
+        body: formData
       })
 
+      const updatedUser = await res.json()
+
+      localStorage.setItem("user", JSON.stringify(updatedUser))
+
+      setForm(prev => ({
+        ...prev,
+        profilePhoto: updatedUser.profilePhoto
+      }))
+
       toast.success("Profile updated")
+
     } catch {
       toast.error("Error updating profile")
     }
   }
-  localStorage.setItem("user", JSON.stringify({
-  ...JSON.parse(localStorage.getItem("user")),
-  phone: form.phone,
-  city: form.city,
-  bio: form.bio
-}))
 
   // Update pet
-const handlePetUpdate = async (pet) => {
-  try {
+  const handlePetUpdate = async (pet) => {
+    try {
+      const formData = new FormData()
 
-    const formData = new FormData()
+      Object.keys(pet).forEach(key => {
+        if (key === "fears") {
+          formData.append(key, JSON.stringify(pet[key]))
+        } else {
+          formData.append(key, pet[key])
+        }
+      })
 
-    Object.keys(pet).forEach(key => {
-      if (key === "fears") {
-        formData.append(key, JSON.stringify(pet[key]))
-      } else {
-        formData.append(key, pet[key])
-      }
-    })
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${pet._id}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      })
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${pet._id}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: formData
-    })
+      const updatedPet = await res.json()
 
-    const updatedPet = await res.json()
+      setPets(prev =>
+        prev.map(p => p._id === pet._id ? updatedPet : p)
+      )
 
-    setPets(prev =>
-      prev.map(p => p._id === pet._id ? updatedPet : p)
-    )
+      setEditingPetId(null)
+      toast.success("Dog updated")
 
-    setEditingPetId(null)
-
-    toast.success("Dog updated")
-
-  } catch {
-    toast.error("Error updating dog")
+    } catch {
+      toast.error("Error updating dog")
+    }
   }
-}
 
-  // Delete pet
   const handlePetDelete = async (id) => {
     try {
       await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${id}`, {
@@ -124,12 +132,12 @@ const handlePetUpdate = async (pet) => {
 
       setPets(pets.filter(p => p._id !== id))
       toast.success("Dog removed")
+
     } catch {
       toast.error("Error deleting dog")
     }
   }
 
-  // Add new pet
   const handleAddPet = async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/add`, {
@@ -149,6 +157,7 @@ const handlePetUpdate = async (pet) => {
       const data = await res.json()
       setPets([...pets, data.pet])
       toast.success("Dog added")
+
     } catch {
       toast.error("Error adding dog")
     }
@@ -159,116 +168,121 @@ const handlePetUpdate = async (pet) => {
   return (
     <div className="max-w-4xl mx-auto py-16 px-6 space-y-12">
 
-{/* PERSONAL INFO */}
-<div className="bg-linear-to-br from-orange-50 to-white p-8 rounded-3xl shadow-lg">
+      {/* PERSONAL INFO */}
+      <div className="bg-linear-to-br from-orange-50 to-white p-8 rounded-3xl shadow-lg">
 
-  {/* Header */}
-  <div className="flex justify-between items-center mb-6">
-    <h2 className="text-2xl font-bold flex items-center gap-2">
-      👤 Personal Information
-    </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">👤 Personal Information</h2>
 
-    {!editProfile ? (
-      <button
-        onClick={() => setEditProfile(true)}
-        className="text-orange-500 font-semibold hover:text-orange-600"
-      >
-        Edit
-      </button>
-    ) : (
-      <button
-        onClick={() => setEditProfile(false)}
-        className="text-gray-500"
-      >
-        Cancel
-      </button>
-    )}
-  </div>
+          {!editProfile ? (
+            <button onClick={() => setEditProfile(true)} className="text-orange-500 font-semibold">
+              Edit
+            </button>
+          ) : (
+            <button onClick={() => setEditProfile(false)} className="text-gray-500">
+              Cancel
+            </button>
+          )}
+        </div>
 
-  {!editProfile ? (
-    /* VIEW MODE */
-    <div className="space-y-4 text-gray-700">
+        {!editProfile ? (
+          <div className="space-y-4">
 
-      <div className="bg-white p-5 rounded-2xl shadow-sm">
-        <p className="text-sm text-gray-400">Full Name</p>
-        <p className="font-semibold text-lg">{form.name}</p>
+            <div className="flex justify-center mb-6">
+              <img
+                src={form.profilePhoto || "/default-avatar.png"}
+                className="w-24 h-24 rounded-full object-cover border"
+              />
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl">
+              <p className="text-sm text-gray-400">Full Name</p>
+              <p className="font-semibold text-lg">{form.name}</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl">
+              <p className="text-sm text-gray-400">Email</p>
+              <p className="font-semibold text-lg">{form.email}</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl">
+              <p className="text-sm text-gray-400">Phone</p>
+              <p className="font-semibold text-lg">{form.phone || "Not added"}</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl">
+              <p className="text-sm text-gray-400">City</p>
+              <p className="font-semibold text-lg">{form.city || "Not added"}</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl">
+              <p className="text-sm text-gray-400">About Me</p>
+              <p className="font-semibold text-lg">{form.bio || "Not added"}</p>
+            </div>
+
+          </div>
+        ) : (
+          <div className="space-y-5">
+
+            {/* 🔥 CLICKABLE IMAGE */}
+            <div className="flex justify-center">
+              <img
+                src={
+                  form.profilePhoto instanceof File
+                    ? URL.createObjectURL(form.profilePhoto)
+                    : form.profilePhoto || "/default-avatar.png"
+                }
+                className="w-24 h-24 rounded-full object-cover border cursor-pointer"
+                onClick={() => document.getElementById("photoInput").click()}
+              />
+            </div>
+
+            <input
+              id="photoInput"
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={(e) =>
+                setForm({ ...form, profilePhoto: e.target.files[0] })
+              }
+            />
+
+            <input value={form.name} disabled className="w-full p-4 border rounded-xl bg-gray-100" />
+            <input value={form.email} disabled className="w-full p-4 border rounded-xl bg-gray-100" />
+
+            <input
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className="w-full p-4 border rounded-xl"
+            />
+
+            <input
+              value={form.city}
+              onChange={(e) => setForm({ ...form, city: e.target.value })}
+              className="w-full p-4 border rounded-xl"
+            />
+
+            <textarea
+              value={form.bio}
+              onChange={(e) => setForm({ ...form, bio: e.target.value })}
+              className="w-full p-4 border rounded-xl"
+            />
+
+            <button
+              onClick={() => {
+                handleUserSave()
+                setEditProfile(false)
+              }}
+              className="bg-orange-500 text-white px-6 py-3 rounded-full"
+            >
+              Save Changes
+            </button>
+
+          </div>
+        )}
       </div>
 
-      <div className="bg-white p-5 rounded-2xl shadow-sm">
-        <p className="text-sm text-gray-400">Email</p>
-        <p className="font-semibold text-lg">{form.email}</p>
-      </div>
-
-      <div className="bg-white p-5 rounded-2xl shadow-sm">
-        <p className="text-sm text-gray-400">Phone</p>
-        <p className="font-semibold text-lg">
-          {form.phone || "Not added"}
-        </p>
-      </div>
-
-      <div className="bg-white p-5 rounded-2xl shadow-sm">
-        <p className="text-sm text-gray-400">City</p>
-        <p className="font-semibold text-lg">
-          {form.city || "Not added"}
-        </p>
-      </div>
-
-      <div className="bg-white p-5 rounded-2xl shadow-sm">
-  <p className="text-sm text-gray-400">About Me</p>
-  <p className="font-semibold text-lg">
-    {form.bio || "Not added"}
-  </p>
-</div>
-
-    </div>
-  ) : (
-    /* EDIT MODE */
-    <div className="space-y-5">
-
-      <input
-        value={form.name}
-        disabled
-        className="w-full p-4 border rounded-xl bg-gray-100"
-      />
-
-      <input
-        value={form.email}
-        disabled
-        className="w-full p-4 border rounded-xl bg-gray-100"
-      />
-
-      <input
-        value={form.phone}
-        onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        placeholder="Phone Number"
-        className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-orange-200"
-      />
-
-      <input
-        value={form.city}
-        onChange={(e) => setForm({ ...form, city: e.target.value })}
-        placeholder="City"
-        className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-orange-200"
-      />
-<textarea
-  value={form.bio}
-  onChange={(e) => setForm({ ...form, bio: e.target.value })}
-  placeholder="Tell why you love dogs / your experience..."
-  className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-orange-200"
-/>
-      <button
-        onClick={() => {
-          handleUserSave()
-          setEditProfile(false)
-        }}
-        className="bg-orange-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-orange-600 transition"
-      >
-        Save Changes
-      </button>
-
-    </div>
-  )}
-</div>
+    
 
 {/* DOGS SECTION */}
 <div className="bg-linear-to-br from-orange-50 to-white p-8 rounded-3xl shadow-lg space-y-8">

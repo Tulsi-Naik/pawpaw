@@ -1,11 +1,9 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom"
-import { useState } from "react"
 import { Menu, X, Search } from "lucide-react"
-
+import { useState, useEffect } from "react"
 export default function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const user = JSON.parse(localStorage.getItem("user"))
   const [open, setOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
 
@@ -14,6 +12,18 @@ export default function AppLayout() {
     localStorage.removeItem("user")
     navigate("/login")
   }
+
+  const [currentUser, setCurrentUser] = useState(
+  JSON.parse(localStorage.getItem("user"))
+)
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentUser(JSON.parse(localStorage.getItem("user")))
+  }, 1000)
+
+  return () => clearInterval(interval)
+}, [])
 
   const navItems = [
         { name: "Home", path: "/app/home" },
@@ -110,12 +120,23 @@ export default function AppLayout() {
           </div>
 
           {/* Profile */}
-<div className="ml-auto relative">            <div
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold cursor-pointer"
-            >
-              {user?.name?.charAt(0)}
-            </div>
+<div className="ml-auto relative">         
+   <div
+  onClick={() => setProfileOpen(!profileOpen)}
+  className="w-10 h-10 rounded-full overflow-hidden cursor-pointer"
+>
+{currentUser?.profilePhoto ? (
+  <img
+    src={currentUser.profilePhoto}
+    alt="profile"
+    className="w-full h-full object-cover"
+  />
+) : (
+  <div className="w-full h-full bg-orange-500 text-white flex items-center justify-center font-bold">
+    {currentUser?.name?.charAt(0)?.toUpperCase()}
+  </div>
+)}
+</div>
 
             {profileOpen && (
               <div className="absolute right-0 mt-3 w-40 bg-white rounded-xl shadow-lg py-2">

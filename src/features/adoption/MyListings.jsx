@@ -1,31 +1,30 @@
-import { useEffect, useState } from "react"
-import toast from "react-hot-toast"
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function MyListings() {
-  const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token");
 
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
- useEffect(() => {
-  const fetchData = async () => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/adoption/my-listings`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/adoption/my-listings`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    const json = await res.json()
+        const json = await res.json();
+        setData(json);
+      } catch {
+        toast.error("Failed to load listings");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // 🔥 FORCE CLEAN COPY
-    const clean = JSON.parse(JSON.stringify(json))
-
-    console.log("CLEAN DATA:", clean)
-
-    setData(clean)
-    setLoading(false)
-  }
-
-  fetchData()
-}, [token])
+    fetchData();
+  }, [token]);
 
   const handleAction = async (requestId, action) => {
     try {
@@ -35,143 +34,181 @@ export default function MyListings() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ action })
+          body: JSON.stringify({ action }),
         }
-      )
+      );
 
-      const data = await res.json()
+      const result = await res.json();
 
       if (res.ok) {
-        toast.success(data.message)
-        window.location.reload()
+        toast.success(result.message);
+        window.location.reload();
       } else {
-        toast.error(data.message)
+        toast.error(result.message);
       }
-
     } catch {
-      toast.error("Error")
+      toast.error("Error updating request");
     }
-  }
+  };
 
-  if (loading) return <p className="p-8">Loading...</p>
+  if (loading)
+    return <p className="p-8 text-center text-gray-500">Loading...</p>;
 
   return (
     <div className="max-w-6xl mx-auto p-8">
+      <h1 className="text-4xl font-extrabold mb-10">🐶 My Adoption Listings</h1>
 
-      <h1 className="text-3xl font-bold mb-6">
-        🐶 My Adoption Listings
-      </h1>
+      {data.length === 0 ? (
+        <div className="bg-gray-50 border-dashed border-2 p-12 rounded-3xl text-center">
+          <p className="text-gray-500">
+            You haven't posted any dogs yet.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-12">
+          {data.map((item) => {
+            const { listing, requests } = item;
 
-      {data.length === 0 && (
-        <p className="text-gray-500">No listings yet</p>
-      )}
+            return (
+              <div key={listing._id} className="bg-white rounded-3xl shadow-lg border">
 
-      <div className="space-y-8">
+                {/* DOG HEADER */}
+                <div className="flex items-center gap-6 p-6 border-b bg-orange-50">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden bg-orange-200">
+                    {listing.pet?.profilePhoto ? (
+                      <img
+                        src={listing.pet.profilePhoto}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-3xl">
+                        🐕
+                      </div>
+                    )}
+                  </div>
 
-        {data.map(item => {
-          const { listing, requests } = item
+                  <div>
+                    <h2 className="text-2xl font-bold">
+                      {listing.pet?.name}
+                    </h2>
+                    <p className="text-orange-600 font-medium">
+                      {listing.pet?.breed}
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      {requests.length} requests
+                    </p>
+                  </div>
+                </div>
 
-          return (
-            <div key={listing._id} className="bg-white rounded-3xl shadow-lg overflow-hidden">
-
-              {/* Dog Header */}
-              <div className="flex gap-4 p-6 border-b">
-
-                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-200">
-                  {listing.pet?.profilePhoto ? (
-                    <img
-                      src={listing.pet.profilePhoto}
-                      className="w-full h-full object-cover"
-                    />
+                {/* REQUESTS */}
+                <div className="p-8 space-y-6">
+                  {requests.length === 0 ? (
+                    <p className="text-gray-400 italic">
+                      No requests yet
+                    </p>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      🐶
-                    </div>
+                    requests.map((req) => {
+                      const u = req.requester || {};
+
+                      return (
+                        <div
+                          key={req._id}
+                          className="border rounded-2xl p-6 shadow-sm hover:shadow-md transition"
+                        >
+
+                          {/* HEADER */}
+                          <div className="flex justify-between items-start mb-4">
+
+                            <div className="flex gap-4 items-center">
+                              {/* PROFILE PHOTO */}
+                              <div className="w-12 h-12 rounded-full overflow-hidden bg-orange-100">
+                                {u.profilePhoto ? (
+                                  <img
+                                    src={u.profilePhoto}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex items-center justify-center h-full font-bold text-orange-600">
+                                    {u.name?.charAt(0)}
+                                  </div>
+                                )}
+                              </div>
+
+                              <div>
+                                <p className="font-bold text-lg">{u.name}</p>
+                                <p className="text-sm text-gray-500">
+                                  📍 {u.city}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* STATUS */}
+                            <span
+                              className={`text-xs px-3 py-1 rounded-full font-semibold ${
+                                req.status === "pending"
+                                  ? "bg-orange-100 text-orange-700"
+                                  : req.status === "approved"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {req.status}
+                            </span>
+                          </div>
+
+                          {/* BIO */}
+                          {u.bio && (
+                            <div className="mb-4 bg-gray-50 p-4 rounded-xl">
+                              <p className="text-xs text-gray-400 mb-1">
+                                Profile
+                              </p>
+                              <p className="text-sm">{u.bio}</p>
+                            </div>
+                          )}
+
+                          {/* MESSAGE */}
+                          {req.message && (
+                            <div className="mb-4 bg-orange-50 p-4 rounded-xl italic">
+                              "{req.message}"
+                            </div>
+                          )}
+
+                          {/* CONTACT AFTER APPROVAL */}
+                          {req.status === "approved" && u.phone && (
+                            <p className="text-sm text-green-600 font-medium mb-4">
+                              📞 {u.phone}
+                            </p>
+                          )}
+
+                          {/* ACTIONS */}
+                          {req.status === "pending" && (
+                            <div className="flex gap-3 mt-4">
+                              <button
+                                onClick={() => handleAction(req._id, "approve")}
+                                className="flex-1 bg-green-500 text-white py-3 rounded-xl"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleAction(req._id, "reject")}
+                                className="flex-1 border text-red-500 py-3 rounded-xl"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
                   )}
                 </div>
-
-                <div className="flex flex-col justify-center">
-                  <h2 className="text-xl font-bold">
-                    {listing.pet?.name}
-                  </h2>
-                  <p className="text-gray-500 text-sm">
-                    {listing.pet?.breed}
-                  </p>
-
-                  <p className="text-xs text-gray-400 mt-1">
-                    {requests.length} request{requests.length !== 1 && "s"}
-                  </p>
-                </div>
-
               </div>
-
-              {/* Requests */}
-              <div className="p-6 space-y-4">
-
-                {requests.length === 0 ? (
-                  <p className="text-gray-400 text-sm">
-                    No requests yet
-                  </p>
-                ) : (
-                  requests.map(req => (
-                    <div
-                      key={req._id}
-                      className="border rounded-xl p-4 bg-gray-50"
-                    >
-
-                      {/* Name + City */}
-                      <p className="font-semibold text-lg">
-                        {req.requester?.name}
-                      </p>
-
-                      <p className="text-sm text-gray-500">
-                        📍 {req.requester?.city}
-                      </p>
-
-                      {/* BIO */}
-                      <p className="text-sm mt-3 text-gray-700 bg-white p-3 rounded-lg border">
-                        🧑‍🦱 <span className="font-medium">About:</span>{" "}
-                        {req.requester?.bio || "No bio provided"}
-                      </p>
-
-                      {/* MESSAGE */}
-                      <p className="text-sm mt-2 text-gray-700 bg-white p-3 rounded-lg border">
-                        💬 <span className="font-medium">Why adopt:</span>{" "}
-                        {req.message || "No message provided"}
-                      </p>
-
-                      {/* Actions */}
-                      {req.status === "pending" && (
-                        <div className="flex gap-2 mt-4 justify-end">
-                          <button
-                            onClick={() => handleAction(req._id, "approve")}
-                            className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-sm"
-                          >
-                            Approve
-                          </button>
-
-                          <button
-                            onClick={() => handleAction(req._id, "reject")}
-                            className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-sm"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      )}
-
-                    </div>
-                  ))
-                )}
-
-              </div>
-
-            </div>
-          )
-        })}
-
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
-  )
+  );
 }
