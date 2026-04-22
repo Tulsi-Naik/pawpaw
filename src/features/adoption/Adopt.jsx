@@ -118,6 +118,33 @@ export default function Adopt() {
 
   if (loading) return <p className="p-8">Loading...</p>
 
+  const handleFinalize = async (requestId) => {
+    if (!window.confirm("Confirming this means you have physically received the dog. Proceed?")) return;
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/adoption/finalize/${requestId}`, {
+        method: "PUT",
+        headers: { 
+          "Authorization": `Bearer ${token}` 
+        }
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Congratulations! Ownership transferred. 🐶");
+        // Update local state to show 'completed'
+        setMyRequests(prev => prev.map(r => 
+          r._id === requestId ? { ...r, status: "completed" } : r
+        ));
+      } else {
+        toast.error(data.message || "Transfer failed");
+      }
+    } catch (err) {
+      toast.error("Error finalizing handover");
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-8 space-y-6">
       {/* Header Section */}
@@ -242,7 +269,7 @@ export default function Adopt() {
                     const u = req.requester || {}
                     return (
                       <div key={req._id} className="flex gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <div className="w-10 h-10 rounded-full bg-orange-100 overflow-hidden flex-shrink-0 border-2 border-white shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-orange-100 overflow-hidden shrink-0 border-2 border-white shadow-sm">
                           {u.profilePhoto ? (
                             <img src={u.profilePhoto} className="w-full h-full object-cover" />
                           ) : (
@@ -311,7 +338,7 @@ export default function Adopt() {
 
         return (
           <div key={r._id} className="bg-white p-4 rounded-2xl shadow-sm border flex gap-4 items-start">
-            <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border">
+            <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-100 border">
               {r.listing?.pet?.profilePhoto ? (
                 <img src={r.listing.pet.profilePhoto} className="w-full h-full object-cover" />
               ) : (
@@ -325,11 +352,13 @@ export default function Adopt() {
                   <h3 className="font-bold text-lg leading-tight">{r.listing?.pet?.name}</h3>
                   <p className="text-sm text-gray-500">{r.listing?.pet?.breed}</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
-                  r.status === "approved" ? "bg-green-100 text-green-700 border border-green-200" :
-                  r.status === "rejected" ? "bg-red-100 text-red-700 border border-red-200" : 
-                  "bg-orange-100 text-orange-700 border border-orange-200"
-                }`}>
+                <span // Replace the className logic for the status span:
+className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
+  r.status === "approved" ? "bg-green-100 text-green-700 border border-green-200" :
+  r.status === "completed" ? "bg-blue-100 text-blue-700 border border-blue-200" : // 🔥 Added this
+  r.status === "rejected" ? "bg-red-100 text-red-700 border border-red-200" : 
+  "bg-orange-100 text-orange-700 border border-orange-200"
+}`}>
                   {r.status}
                 </span>
               </div>
@@ -338,22 +367,31 @@ export default function Adopt() {
                 <p className="text-xs mt-2 text-gray-400 italic">Your message: "{r.message}"</p>
               )}
 
-              {r.status === "approved" && (
+             {r.status === "approved" && (
                 <div className="mt-3 p-3 bg-green-50 rounded-xl border border-green-100">
-                  <p className="text-[10px] font-bold text-green-800 uppercase mb-1">Owner Contact Info</p>
-                  <p className="text-sm font-semibold text-gray-800">{owner?.name || "Pet Owner"}</p>
+                  <p className="text-[10px] font-bold text-green-800 uppercase mb-1">Step 2: Confirm Handover</p>
+                  <p className="text-xs text-gray-600 mb-3">Once you have received the dog, click below to finalize ownership.</p>
                   
-                  {hasPhone ? (
-                    <a 
-                      href={`tel:${hasPhone}`} 
-                      onClick={() => toast.success(`Opening dialer for ${owner?.name}...`)}
-                      className="text-sm text-green-700 font-bold hover:underline flex items-center gap-1"
-                    >
-                      📞 {hasPhone}
-                    </a>
-                  ) : (
-                    <p className="text-sm text-gray-400 italic">No phone number shared</p>
-                  )}
+                  <button 
+                    onClick={() => handleFinalize(r._id)}
+                    className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-bold shadow-md hover:bg-green-700 transition"
+                  >
+                    Confirm Dog Received 🐾
+                  </button>
+
+                  <div className="mt-3 pt-3 border-t border-green-200">
+                    <p className="text-[10px] font-bold text-green-800 uppercase mb-1">Owner Contact</p>
+                    <p className="text-sm font-semibold text-gray-800">{owner?.name || "Pet Owner"}</p>
+                    {hasPhone && (
+                      <a href={`tel:${hasPhone}`} className="text-sm text-green-700 font-bold">📞 {hasPhone}</a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {r.status === "completed" && (
+                <div className="mt-3 p-3 bg-blue-50 text-blue-700 rounded-xl text-center font-bold text-sm border border-blue-100">
+                  ✅ Ownership Transferred
                 </div>
               )}
             </div>

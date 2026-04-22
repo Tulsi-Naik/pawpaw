@@ -120,6 +120,12 @@ const filteredJobs = historyJobs.filter(b => {
       <div>
         <p className="font-semibold">
           {b.pet?.name} • {b.service?.category}
+          {/* 🟢 Added Refund Badge */}
+      {b.paymentStatus === "Refunded" && (
+        <span className="ml-2 text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase">
+          Refunded (Adoption)
+        </span>
+      )}
         </p>
 
         <p className="text-sm text-gray-500">
@@ -131,11 +137,11 @@ const filteredJobs = historyJobs.filter(b => {
         </p>
       </div>
 
-      <div className="text-right">
-        <p className="text-green-600 font-semibold">
-          +₹{b.caregiverEarning}
-        </p>
-      </div>
+     <div className="text-right">
+    <p className={`${b.paymentStatus === "Refunded" ? "text-gray-400 line-through" : "text-green-600"} font-semibold`}>
+      +₹{b.caregiverEarning}
+    </p>
+  </div>
 
     </div>
   ))}

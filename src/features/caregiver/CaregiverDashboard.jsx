@@ -6,49 +6,50 @@ export default function CaregiverDashboard() {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [scope, setScope] = useState("city")
-const user = JSON.parse(localStorage.getItem("user"))
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const [openRes, assignedRes] = await Promise.all([
-fetch(`${import.meta.env.VITE_API_URL}/api/bookings/open?scope=${scope}`, {
+  const user = JSON.parse(localStorage.getItem("user"))
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [openRes, assignedRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/api/bookings/open?scope=${scope}`, {
             headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my-assignments`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-      ])
+          }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my-assignments`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ])
 
-      const openData = await openRes.json()
-      const assignedData = await assignedRes.json()
+        const openData = await openRes.json()
+        const assignedData = await assignedRes.json()
 
-      setBookings([...assignedData, ...openData])
+        setBookings([...assignedData, ...openData])
 
-    } catch {
-      toast.error("Failed to load bookings")
+      } catch {
+        toast.error("Failed to load bookings")
+      }
+
+      setLoading(false)
     }
 
-    setLoading(false)
+    fetchData()
+  }, [token, scope])
+
+  const getDogAge = (dob) => {
+    if (!dob) return null
+
+    const birth = new Date(dob)
+    const today = new Date()
+
+    let age = today.getFullYear() - birth.getFullYear()
+    const m = today.getMonth() - birth.getMonth()
+
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+
+    return age
   }
-
-  fetchData()
-}, [token, scope])
-
-const getDogAge = (dob) => {
-  if (!dob) return null
-
-  const birth = new Date(dob)
-  const today = new Date()
-
-  let age = today.getFullYear() - birth.getFullYear()
-  const m = today.getMonth() - birth.getMonth()
-
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-    age--
-  }
-
-  return age
-}
 
   const handleAccept = async (id) => {
     try {
@@ -75,94 +76,101 @@ const getDogAge = (dob) => {
   }
 
   if (loading) return <div className="p-10">Loading...</div>
+
   const sortedBookings = [...bookings].sort((a, b) => {
-  if (a.pet?.owner?.city === user.city) return -1
-  if (b.pet?.owner?.city === user.city) return 1
-  return 0
-})
+    if (a.pet?.owner?.city === user.city) return -1
+    if (b.pet?.owner?.city === user.city) return 1
+    return 0
+  })
 
   return (
     <div className="max-w-6xl mx-auto py-16 px-6 space-y-10">
 
-     <h1 className="text-4xl font-extrabold text-center">
-  {user?.skills?.includes("grooming")
-    ? "Groomer Dashboard ✂️"
-    : "Walker Dashboard 🐕"}
-</h1>
+      <h1 className="text-4xl font-extrabold text-center">
+        {user?.skills?.includes("grooming")
+          ? "Groomer Dashboard ✂️"
+          : "Walker Dashboard 🐕"}
+      </h1>
 
-      {/*  Accepted Walks */}
-<h2 className="text-2xl font-bold">
-  {user?.skills?.includes("grooming")
-    ? "My Accepted Grooming Jobs"
-    : "My Accepted Walks"}
-</h2>
+      {/* Accepted Walks */}
+      <h2 className="text-2xl font-bold">
+        {user?.skills?.includes("grooming")
+          ? "My Accepted Grooming Jobs"
+          : "My Accepted Walks"}
+      </h2>
+      
       <div className="grid md:grid-cols-2 gap-6">
         {sortedBookings.filter(b => b.status === "Accepted")
-      
           .map(booking => (
             <div
               key={booking._id}
               className="bg-white rounded-2xl shadow-md p-6 space-y-4 border-l-4 border-green-500"
             >
-            <p className="text-sm font-semibold text-blue-600">
-  {booking.service?.category === "walking" ? "🐕 Dog Walk" : "✂️ Grooming"}
-</p>
+              <p className="text-sm font-semibold text-blue-600">
+                {booking.service?.category === "walking" ? "🐕 Dog Walk" : "✂️ Grooming"}
+              </p>
 
-<div className="flex items-center gap-3">
-  <img
-    src={
-      booking.pet?.profilePhoto ||
-      `https://ui-avatars.com/api/?name=${booking.pet?.name}`
-    }
-    className="w-12 h-12 rounded-full object-cover border"
-  />
+              <div className="flex items-center gap-3">
+                <img
+                  src={
+                    booking.pet?.profilePhoto ||
+                    `https://ui-avatars.com/api/?name=${booking.pet?.name}`
+                  }
+                  className="w-12 h-12 rounded-full object-cover border"
+                />
 
-  <h3 className="font-bold text-lg">
-    {booking.pet?.name}
-  </h3>
-</div>
+                <h3 className="font-bold text-lg">
+                  {booking.pet?.name}
+                </h3>
+              </div>
 
-<p className="text-sm text-gray-600">
-Breed: {booking.pet?.breed || "Unknown"}
-{booking.pet?.dateOfBirth && (
-  <> • Age: {getDogAge(booking.pet.dateOfBirth)} yrs</>
-)}</p>
+              <p className="text-sm text-gray-600">
+                Breed: {booking.pet?.breed || "Unknown"}
+                {booking.pet?.dateOfBirth && (
+                  <> • Age: {getDogAge(booking.pet.dateOfBirth)} yrs</>
+                )}
+              </p>
 
-<p className="text-sm text-gray-600">
-  ⚡ Energy: {booking.pet?.energyLevel ?? 3}/5 •
-  🚶 Walk Speed: {booking.pet?.walkSpeed ?? 3}/5
-</p>
+              <p className="text-sm text-gray-600">
+                ⚡ Energy: {booking.pet?.energyLevel ?? 3}/5 •
+                🚶 Walk Speed: {booking.pet?.walkSpeed ?? 3}/5
+              </p>
 
-{booking.pet?.allergies && (
-  <p className="text-sm text-red-500">
-    ⚠ Allergies: {booking.pet.allergies}
-  </p>
-)}
+              {booking.pet?.allergies && (
+                <p className="text-sm text-red-500">
+                  ⚠ Allergies: {booking.pet.allergies}
+                </p>
+              )}
 
-{booking.pet?.fears?.length > 0 && (
-  <p className="text-sm text-gray-600">
-    😟 Fears: {booking.pet.fears.join(", ")}
-  </p>
-)}
+              {booking.pet?.fears?.length > 0 && (
+                <p className="text-sm text-gray-600">
+                  😟 Fears: {booking.pet.fears.join(", ")}
+                </p>
+              )}
 
               <p className="text-gray-600">
-                {new Date(booking.date).toDateString()}
+                📅 {new Date(booking.date).toDateString()}
               </p>
 
               <p className="text-gray-600">
-                {booking.timeSlot} • {booking.duration} mins
+                ⏰ {booking.timeSlot} • {booking.duration} mins
               </p>
 
               <p className="font-semibold text-orange-600">
                 ₹{booking.finalPrice}
               </p>
 
-              <p className="text-gray-600">
-                📍 {booking.pet?.owner?.city}
-              </p>
+              {/* 🔥 UPDATED ADDRESS SECTION FOR ACCEPTED JOBS */}
+              <div className="bg-orange-50 p-3 rounded-xl border border-orange-100">
+                <p className="text-[10px] font-bold text-orange-800 uppercase">Pickup Address</p>
+                <p className="text-sm text-gray-700 font-medium">
+                  {booking.pet?.owner?.address || "Address not provided"}
+                </p>
+                <p className="text-xs text-gray-500">📍 {booking.pet?.owner?.city}</p>
+              </div>
 
-              <p className="text-gray-600 text-sm">
-                📞 {booking.pet?.owner?.phone}
+              <p className="text-green-700 font-bold text-sm">
+                📞 {booking.pet?.owner?.phone || "No phone added"}
               </p>
 
               <span className="text-green-600 font-semibold">
@@ -172,153 +180,128 @@ Breed: {booking.pet?.breed || "Unknown"}
           ))}
       </div>
 
-{/*  Pending Requests */}
+      {/* Pending Requests */}
+      <div className="mt-12 space-y-3">
+        <div className="flex gap-3">
+          <button
+            onClick={() => setScope("city")}
+            className={`px-4 py-2 rounded-lg ${
+              scope === "city"
+                ? "bg-orange-500 text-white"
+                : "bg-gray-200"
+            }`}
+          >
+            Same City
+          </button>
 
-<div className="mt-12 space-y-3">
+          <button
+            onClick={() => setScope("all")}
+            className={`px-4 py-2 rounded-lg ${
+              scope === "all"
+                ? "bg-orange-500 text-white"
+                : "bg-gray-200"
+            }`}
+          >
+            All Jobs
+          </button>
+        </div>
 
-  {/* FILTER BUTTONS */}
-  <div className="flex gap-3">
-    <button
-      onClick={() => setScope("city")}
-      className={`px-4 py-2 rounded-lg ${
-        scope === "city"
-          ? "bg-orange-500 text-white"
-          : "bg-gray-200"
-      }`}
-    >
-      Same City
-    </button>
+        <h2 className="text-2xl font-bold">
+          {user?.skills?.includes("grooming")
+            ? "Open Grooming Requests"
+            : "Open Walk Requests"}
+        </h2>
+      </div>
 
-    <button
-      onClick={() => setScope("all")}
-      className={`px-4 py-2 rounded-lg ${
-        scope === "all"
-          ? "bg-orange-500 text-white"
-          : "bg-gray-200"
-      }`}
-    >
-      All Jobs
-    </button>
-  </div>
-
-  {/* HEADING */}
-  <h2 className="text-2xl font-bold">
-    {user?.skills?.includes("grooming")
-      ? "Open Grooming Requests"
-      : "Open Walk Requests"}
-  </h2>
-
-</div>
       <div className="grid md:grid-cols-2 gap-6">
         {sortedBookings.filter(b => b.status === "Pending")
           .map(booking => (
-<div
-  key={booking._id}
-  className="bg-white rounded-2xl border shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition"
->
+            <div
+              key={booking._id}
+              className="bg-white rounded-2xl border shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition"
+            >
+              {/* HEADER */}
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={
+                        booking.pet?.profilePhoto ||
+                        `https://ui-avatars.com/api/?name=${booking.pet?.name}`
+                      }
+                      className="w-12 h-12 rounded-full object-cover border"
+                    />
+                    <h3 className="font-bold text-lg">
+                      {booking.pet?.name}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {booking.pet?.breed || "Unknown"}
+                    {booking.pet?.dateOfBirth && (
+                      <> • {getDogAge(booking.pet.dateOfBirth)} yrs</>
+                    )}
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                  {booking.service?.category === "walking"
+                    ? "DOG WALK"
+                    : "GROOMING"}
+                </span>
+              </div>
 
-  {/* HEADER */}
-  <div className="flex justify-between items-center">
+              {/* APPOINTMENT */}
+              <div className="text-sm text-gray-700 flex flex-wrap gap-x-4 gap-y-1">
+                <span>
+                  📅 {new Date(booking.date).toDateString()}
+                </span>
+                <span>
+                  ⏰ {booking.timeSlot}
+                </span>
+                <span>
+                  ⏱ {booking.duration} mins
+                </span>
+                <div className="flex items-center gap-2">
+                  <span>
+                    📍 {booking.pet?.owner?.city}
+                  </span>
+                  {booking.pet?.owner?.city !== user.city && (
+                    <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full font-bold text-gray-400">
+                      OTHER CITY
+                    </span>
+                  )}
+                </div>
+              </div>
 
-    <div>
-   <div className="flex items-center gap-3">
-  <img
-    src={
-      booking.pet?.profilePhoto ||
-      `https://ui-avatars.com/api/?name=${booking.pet?.name}`
-    }
-    className="w-12 h-12 rounded-full object-cover border"
-  />
+              {/* DOG TRAITS */}
+              <div className="text-xs text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
+                <span>
+                  ⚡ Energy {booking.pet?.energyLevel ?? 3}/5
+                </span>
+                <span>
+                  🚶 Speed {booking.pet?.walkSpeed ?? 3}/5
+                </span>
+                {booking.pet?.allergies && (
+                  <span className="text-red-500">
+                    ⚠ {booking.pet.allergies}
+                  </span>
+                )}
+              </div>
 
-  <h3 className="font-bold text-lg">
-    {booking.pet?.name}
-  </h3>
-</div>
-
-      <p className="text-sm text-gray-500">
-        {booking.pet?.breed || "Unknown"}
-          {booking.pet?.dateOfBirth && (
-    <> • {getDogAge(booking.pet.dateOfBirth)} yrs</>
-  )}
-      </p>
-    </div>
-
-    <span className="text-xs font-semibold text-blue-600">
-      {booking.service?.category === "walking"
-        ? "DOG WALK"
-        : "GROOMING"}
-    </span>
-
-  </div>
-
-  {/* APPOINTMENT */}
-  <div className="text-sm text-gray-700 flex flex-wrap gap-x-4 gap-y-1">
-
-    <span>
-      📅 {new Date(booking.date).toDateString()}
-    </span>
-
-    <span>
-      ⏰ {booking.timeSlot}
-    </span>
-
-    <span>
-      ⏱ {booking.duration} mins
-    </span>
-
-  <div className="flex items-center gap-2">
-  <span>
-    📍 {booking.pet?.owner?.city}
-  </span>
-
-  {booking.pet?.owner?.city !== user.city && (
-    <span className="text-xs text-gray-400">
-      Other City
-    </span>
-  )}
-</div>
-
-  </div>
-
-  {/* DOG TRAITS */}
-  <div className="text-xs text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
-
-    <span>
-      ⚡ Energy {booking.pet?.energyLevel ?? 3}/5
-    </span>
-
-    <span>
-      🚶 Speed {booking.pet?.walkSpeed ?? 3}/5
-    </span>
-
-    {booking.pet?.allergies && (
-      <span className="text-red-500">
-        ⚠ {booking.pet.allergies}
-      </span>
-    )}
-
-  </div>
-
-  {/* PRICE + ACTION */}
-  <div className="flex justify-between items-center mt-2">
-
-    <p className="font-bold text-orange-600">
-      ₹{booking.finalPrice}
-    </p>
-
-    <button
-      onClick={() => handleAccept(booking._id)}
-      className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600"
-    >
-      Accept
-    </button>
-
-  </div>
-
-</div>
+              {/* PRICE + ACTION */}
+              <div className="flex justify-between items-center mt-2">
+                <p className="font-bold text-orange-600">
+                  ₹{booking.finalPrice}
+                </p>
+                <button
+                  onClick={() => handleAccept(booking._id)}
+                  className="bg-orange-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-sm"
+                >
+                  Accept
+                </button>
+              </div>
+            </div>
           ))}
       </div>
-
     </div>
   )
 }
