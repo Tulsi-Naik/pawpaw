@@ -88,6 +88,43 @@ export default function AdminLayout() {
           >
             Users
           </NavLink>
+
+          <NavLink
+  to="/admin/breeds"
+  className={({ isActive }) =>
+    `block px-4 py-2 rounded-lg ${
+      isActive
+        ? "bg-orange-100 text-orange-600 font-semibold"
+        : "hover:bg-gray-100"
+    }`
+  }
+>
+  Breed Analysis
+</NavLink>
+<NavLink
+  to="/admin/caregiver-report"
+  className={({ isActive }) =>
+    `block px-4 py-2 rounded-lg ${
+      isActive
+        ? "bg-orange-100 text-orange-600 font-semibold"
+        : "hover:bg-gray-100"
+    }`
+  }
+>
+  Caregiver Report
+</NavLink>
+<NavLink
+  to="/admin/analytics"
+  className={({ isActive }) =>
+    `block px-4 py-2 rounded-lg ${
+      isActive
+        ? "bg-orange-100 text-orange-600 font-semibold"
+        : "hover:bg-gray-100"
+    }`
+  }
+>
+  Analytics
+</NavLink>
           <NavLink
   to="/admin/blogs"
   className={({ isActive }) =>

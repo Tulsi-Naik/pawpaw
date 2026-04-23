@@ -202,42 +202,7 @@ const fetchBreeds = async () => {
   </div>
   
 
-  {/* Table */}
-  <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-
-    <table className="w-full">
-
-      <thead className="bg-gray-50 text-left text-sm text-gray-600">
-        <tr>
-          <th className="p-4">Breed</th>
-          <th className="p-4">Total Dogs</th>
-        </tr>
-      </thead>
-
-      <tbody>
-  {breeds.length === 0 ? (
-    <tr>
-      <td colSpan="2" className="p-4 text-center text-gray-500">
-        No breed data available
-      </td>
-    </tr>
-  ) : (
-    breeds.map((b, i) => (
-      <tr key={i} className="border-t hover:bg-gray-50">
-        <td className="p-4 font-medium">
-          {b._id || "Unknown"}
-        </td>
-        <td className="p-4">
-          {b.count}
-        </td>
-      </tr>
-    ))
-  )}
-</tbody>
-    </table>
-
-  </div>
-
+ 
 </div>
     </div>
     

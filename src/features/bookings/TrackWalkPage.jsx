@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet"
 import { useParams, useNavigate } from "react-router-dom"
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import * as turf from "@turf/turf"
+import { io } from "socket.io-client"
 
+// ✅ only handles map movement
 function Recenter({ position }) {
   const map = useMap()
 
@@ -18,94 +20,117 @@ function Recenter({ position }) {
 }
 
 export default function TrackWalkPage() {
-
   const { bookingId } = useParams()
   const navigate = useNavigate()
-  const token = localStorage.getItem("token")
 
   const [locations, setLocations] = useState([])
   const [distance, setDistance] = useState(0)
+  const [connected, setConnected] = useState(false)
 
+  const socketRef = useRef(null)
+
+  // 🐕 custom icon
   const dogIcon = new L.Icon({
     iconUrl: "https://cdn-icons-png.flaticon.com/512/616/616408.png",
     iconSize: [35, 35]
   })
 
+  // 🔥 SOCKET REAL-TIME
   useEffect(() => {
+    socketRef.current = io(import.meta.env.VITE_API_URL)
 
-    const interval = setInterval(async () => {
+    socketRef.current.on("connect", () => {
+      setConnected(true)
+      socketRef.current.emit("join-booking", bookingId)
+    })
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/location/${bookingId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+    socketRef.current.on("receive-location", ({ lat, lng }) => {
+      if (!lat || !lng) return
 
-      const data = await res.json()
+      setLocations(prev => {
+        const updated = [...prev, [lat, lng]]
 
-if (Array.isArray(data)) {
+        // 📏 distance calculation
+        if (updated.length > 1) {
+          const line = turf.lineString(
+            updated.map(p => [p[1], p[0]])
+          )
+          const dist = turf.length(line, { units: "kilometers" })
+          setDistance(dist)
+        }
 
-const path = data
-  .filter(p => p.lat && p.lng)
-  .map(p => [p.lat, p.lng])
+        return updated
+      })
+    })
 
-setLocations(path)
+    return () => {
+      if (socketRef.current) socketRef.current.disconnect()
+    }
+  }, [bookingId])
 
-     if (path.length > 1) {
-  const line = turf.lineString(
-    path.map(p => [p[1], p[0]])
-  )
-
-  const dist = turf.length(line, { units: "kilometers" })
-  setDistance(dist)
-}
-      }
-
-    }, 3000)
-
-    return () => clearInterval(interval)
-
-  }, [bookingId, token])
-
+  // ⏳ waiting state
   if (!locations.length) {
-    return <div className="p-10">Waiting for caregiver location...</div>
+    return (
+      <div className="h-screen flex flex-col items-center justify-center text-center">
+        <p className="text-lg font-semibold">Waiting for caregiver location...</p>
+        <p className="text-sm text-gray-500 mt-2">
+          Make sure the walk has started 🐾
+        </p>
+      </div>
+    )
   }
 
   const position = locations[locations.length - 1]
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="h-screen flex flex-col">
 
-      <div className="flex justify-between items-center mb-4">
+      {/* 🔝 TOP BAR */}
+      <div className="bg-white shadow-md p-4 flex justify-between items-center z-10">
 
-        <p className="font-semibold text-lg">
-          Distance walked: {distance.toFixed(2)} km
-        </p>
+        <div>
+          <p className="font-bold text-lg">Live Walk Tracking 🐾</p>
+          <p className="text-sm text-gray-500">
+            Distance: {distance.toFixed(2)} km
+          </p>
+        </div>
 
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-red-500 text-white px-4 py-2 rounded"
-        >
-          Stop Tracking
-        </button>
+        <div className="flex items-center gap-3">
 
+          {/* 🟢 connection status */}
+          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+            connected ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+          }`}>
+            {connected ? "Live" : "Disconnected"}
+          </span>
+
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-red-500 text-white px-3 py-1 rounded"
+          >
+            Exit
+          </button>
+
+        </div>
       </div>
 
-      <div className="h-125 rounded-xl overflow-hidden border">
+      {/* 🗺️ MAP */}
+      <div className="flex-1">
 
         <MapContainer
           center={position}
           zoom={16}
           style={{ height: "100%", width: "100%" }}
         >
-
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
+          {/* 🛤️ path */}
           <Polyline positions={locations} color="blue" />
 
+          {/* 🐕 marker */}
           <Marker position={position} icon={dogIcon} />
 
           <Recenter position={position} />
-
         </MapContainer>
 
       </div>

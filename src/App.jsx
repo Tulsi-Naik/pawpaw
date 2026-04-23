@@ -49,6 +49,9 @@ import BlogPreview from "./components/BlogPreview"
 import AdminAddBlog from "./features/admin/AdminAddBlog"
 import AdminBlogs from "./features/admin/AdminBlogs"
 import AdminEditBlog from "./features/admin/AdminEditBlog"
+import AdminBreeds from "./features/admin/AdminBreeds"
+import AdminCaregiversReport from "./features/admin/AdminCaregiversReport"
+import AdminAnalytics from "./features/admin/AdminAnalytics"
 function Home() {
   return (
     <>
@@ -249,6 +252,9 @@ function App() {
   <Route path="blogs" element={<AdminBlogs />} />
     <Route path="blogs/create" element={<AdminAddBlog />} />
 <Route path="blogs/edit/:id" element={<AdminEditBlog />} />
+<Route path="breeds" element={<AdminBreeds />} />
+<Route path="caregiver-report" element={<AdminCaregiversReport />} />
+<Route path="analytics" element={<AdminAnalytics />} />
 </Route>
     </Routes>
   )

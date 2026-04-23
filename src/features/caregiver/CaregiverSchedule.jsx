@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import Calendar from "react-calendar"
 import "react-calendar/dist/Calendar.css"
 import toast from "react-hot-toast"
+import { io } from "socket.io-client"
+import { useRef } from "react"
 
 export default function CaregiverSchedule() {
   const token = localStorage.getItem("token")
@@ -10,6 +12,17 @@ export default function CaregiverSchedule() {
   const [watchId, setWatchId] = useState(null)
   const [lastLocation, setLastLocation] = useState(null)
 
+const socketRef = useRef(null)
+
+useEffect(() => {
+  socketRef.current = io(import.meta.env.VITE_API_URL)
+
+  return () => {
+    if (socketRef.current) {
+      socketRef.current.disconnect()
+    }
+  }
+}, [])
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my-assignments`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -27,47 +40,62 @@ export default function CaregiverSchedule() {
     }
   }
 
-  const startTracking = (bookingId) => {
-    if (watchId) {
-      navigator.geolocation.clearWatch(watchId)
-    }
+  
 
-    const id = navigator.geolocation.watchPosition(
-      async (position) => {
-        const lat = position.coords.latitude
-        const lng = position.coords.longitude
-
-        if (lastLocation) {
-          const from = turf.point([lastLocation.lng, lastLocation.lat])
-          const to = turf.point([lng, lat])
-          const moved = turf.distance(from, to, { units: "meters" })
-          if (moved < 20) return
-        }
-
-        setLastLocation({ lat, lng })
-
-        await fetch(`${import.meta.env.VITE_API_URL}/api/location/update`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            bookingId,
-            lat,
-            lng
-          })
-        })
-      },
-      (err) => console.log("GPS error", err),
-      {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 10000
-      }
-    )
-    setWatchId(id)
+const startTracking = (bookingId) => {
+  if (watchId) {
+    navigator.geolocation.clearWatch(watchId)
   }
+
+  // ✅ join room
+  socketRef.current.emit("join-booking", bookingId)
+
+  const id = navigator.geolocation.watchPosition(
+    async (position) => {
+      const lat = position.coords.latitude
+      const lng = position.coords.longitude
+
+      if (lastLocation) {
+        const from = turf.point([lastLocation.lng, lastLocation.lat])
+        const to = turf.point([lng, lat])
+        const moved = turf.distance(from, to, { units: "meters" })
+        if (moved < 20) return
+      }
+
+      setLastLocation({ lat, lng })
+
+      // API (keep)
+      await fetch(`${import.meta.env.VITE_API_URL}/api/location/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          bookingId,
+          lat,
+          lng
+        })
+      })
+
+      // ✅ REAL-TIME
+      socketRef.current.emit("send-location", {
+        bookingId,
+        lat,
+        lng
+      })
+    },
+    (err) => console.log("GPS error", err),
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 10000
+    }
+  )
+
+  setWatchId(id) // ✅ IMPORTANT
+}
+
 
   const getDogAge = (dob) => {
     if (!dob) return null
