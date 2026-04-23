@@ -93,12 +93,22 @@ export default function CaregiverLayout() {
           </h1>
 
           <div className="relative">
-            <div
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold cursor-pointer"
-            >
-              {user?.name?.charAt(0)}
-            </div>
+          <div
+  onClick={() => setProfileOpen(!profileOpen)}
+  className="w-10 h-10 rounded-full overflow-hidden cursor-pointer border"
+>
+  {user?.profilePhoto ? (
+    <img
+      src={user.profilePhoto}
+      alt="profile"
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <div className="w-full h-full bg-orange-500 text-white flex items-center justify-center font-bold">
+      {user?.name?.charAt(0)}
+    </div>
+  )}
+</div>
 
             {profileOpen && (
               <div className="absolute right-0 mt-3 w-40 bg-white rounded-xl shadow-lg py-2">

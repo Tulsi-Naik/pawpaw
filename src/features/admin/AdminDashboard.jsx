@@ -13,6 +13,8 @@ export default function AdminDashboard() {
   })
   const [revenue, setRevenue] = useState(null)
 
+  const [breeds, setBreeds] = useState([])
+
   const loadStats = async () => {
     try{
 
@@ -44,6 +46,7 @@ axios.get(`${import.meta.env.VITE_API_URL}/api/applications?status=pending`)
 useEffect(()=>{
   loadStats()
   fetchRevenue()
+  fetchBreeds()
 },[])
 
   const cards = [
@@ -80,6 +83,17 @@ const fetchRevenue = async () => {
     setRevenue(res.data)
   } catch {
     toast.error("Failed to load revenue")
+  }
+}
+
+const fetchBreeds = async () => {
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/admin/breed-stats`
+    )
+    setBreeds(res.data)
+  } catch {
+    toast.error("Failed to load breed stats")
   }
 }
   return (
@@ -152,9 +166,80 @@ const fetchRevenue = async () => {
       </div>
 
     </div>
+ 
 
   </div>
+  
 )}
+
+   <div className="mt-12">
+
+  <h2 className="text-2xl font-bold mb-4">
+    Dog Breed Insights 🐶
+  </h2>
+
+  {/* Top 3 highlight cards */}
+  <div className="grid md:grid-cols-3 gap-4 mb-6">
+
+    {breeds.slice(0, 3).map((b, i) => (
+      <div key={i} className="bg-orange-50 p-4 rounded-xl">
+
+        <p className="text-sm text-gray-500">
+          #{i + 1} Most Listed
+        </p>
+
+        <p className="text-lg font-bold">
+          {b._id || "Unknown"}
+        </p>
+
+        <p className="text-orange-600 font-semibold">
+          {b.count} dogs
+        </p>
+
+      </div>
+    ))}
+
+  </div>
+  
+
+  {/* Table */}
+  <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+
+    <table className="w-full">
+
+      <thead className="bg-gray-50 text-left text-sm text-gray-600">
+        <tr>
+          <th className="p-4">Breed</th>
+          <th className="p-4">Total Dogs</th>
+        </tr>
+      </thead>
+
+      <tbody>
+  {breeds.length === 0 ? (
+    <tr>
+      <td colSpan="2" className="p-4 text-center text-gray-500">
+        No breed data available
+      </td>
+    </tr>
+  ) : (
+    breeds.map((b, i) => (
+      <tr key={i} className="border-t hover:bg-gray-50">
+        <td className="p-4 font-medium">
+          {b._id || "Unknown"}
+        </td>
+        <td className="p-4">
+          {b.count}
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
+    </table>
+
+  </div>
+
+</div>
     </div>
+    
   )
 }

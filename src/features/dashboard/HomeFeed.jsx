@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
+import { Star, Loader2 } from "lucide-react"
 
 export default function HomeFeed() {
   const token = localStorage.getItem("token")
@@ -12,6 +13,10 @@ export default function HomeFeed() {
   const [bookings, setBookings] = useState([])
   const [tip, setTip] = useState("")
   const [showRating, setShowRating] = useState(null)
+
+  const [hover, setHover] = useState(0) // Track which star they are hovering over
+  const [submitting, setSubmitting] = useState(false) // Track API call status
+
 const [todayBlog, setTodayBlog] = useState(null)
   const tips = [
     "🐶 Walk your dog after 30 mins of meals",
@@ -21,53 +26,50 @@ const [todayBlog, setTodayBlog] = useState(null)
     "🐕 Daily walks keep dogs happy"
   ]
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
+ // ... existing imports
 
-        const blogRes = await fetch(`${import.meta.env.VITE_API_URL}/api/blogs`)
-const blogData = await blogRes.json()
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const blogRes = await fetch(`${import.meta.env.VITE_API_URL}/api/blogs`)
+      const blogData = await blogRes.json()
+      if (blogData.length > 0) setTodayBlog(blogData[0])
 
-if (blogData.length > 0) {
-  setTodayBlog(blogData[0]) // latest blog
-}
-        const [listRes, bookingRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/adoption`, {
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my`, {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-        ])
+      const [listRes, bookingRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL}/api/adoption`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/bookings/my`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ])
 
-        const listData = await listRes.json()
-        const bookingData = await bookingRes.json()
+      const listData = await listRes.json()
+      const bookingData = await bookingRes.json() // Read this ONLY ONCE
 
-        setListings(listData.slice(0, 6))
-
-        if (listData.length > 0) {
-          setDogOfDay(
-            listData[Math.floor(Math.random() * listData.length)]
-          )
-        }
-
-        setBookings(bookingData)
-
-        setTip(tips[Math.floor(Math.random() * tips.length)])
-
-        // find last completed booking for rating
-        const completed = bookingData.find(
-          b => b.status === "Completed"
-        )
-        setShowRating(completed || null)
-
-      } catch {
-        toast.error("Error loading home")
+      setListings(listData.slice(0, 6))
+      if (listData.length > 0) {
+        setDogOfDay(listData[Math.floor(Math.random() * listData.length)])
       }
-    }
 
-    fetchData()
-  }, [])
+      setBookings(bookingData)
+      setTip(tips[Math.floor(Math.random() * tips.length)])
+
+      // Corrected logic: find the first booking that is Completed but NOT yet rated
+      const unratedBooking = bookingData.find(
+        b => b.status === "Completed" && b.isRated === false
+      )
+      setShowRating(unratedBooking || null)
+
+    } catch (err) {
+      console.error(err)
+      toast.error("Error loading home")
+    }
+  }
+  fetchData()
+}, [])
+
+// handleRating remains the same as your previous snippet
 
   const upcoming = bookings.filter(
     b =>
@@ -75,11 +77,30 @@ if (blogData.length > 0) {
       b.status !== "Cancelled" &&
       b.status !== "Completed"
   )
+const handleRating = async (ratingValue) => {
+    setSubmitting(true)
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${showRating._id}/rate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ rating: ratingValue })
+      });
 
-  const handleRating = (rating) => {
-    toast.success(`Rated ${rating} ⭐`)
-    setShowRating(null)
-  }
+      if (response.ok) {
+        toast.success(`Rated ${ratingValue} stars! Thank you.`);
+        setShowRating(null); 
+      } else {
+        toast.error("Failed to submit rating");
+      }
+    } catch (error) {
+    toast.error("Something went wrong");
+    } finally {
+      setSubmitting(false)
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-10">
@@ -150,24 +171,44 @@ if (blogData.length > 0) {
   </div>
 )}
 
-      {/* Rate Last Walk */}
+      {/* Upgraded Rating Card */}
       {showRating && (
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <p className="font-semibold mb-3">
-            ⭐ How was your last walk?
-          </p>
+        <div className="bg-orange-50 p-8 rounded-3xl border-2 border-orange-100 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-bold text-xl text-gray-800">
+                How was {showRating.pet?.name}'s {showRating.service?.name}?
+              </h3>
+              <p className="text-orange-600 font-medium">
+                Your feedback helps the Admin keep PawPaw safe!
+              </p>
+            </div>
+            {submitting && <Loader2 className="animate-spin text-orange-500" />}
+          </div>
 
-          <div className="flex gap-2">
-            {[1,2,3,4,5].map(n => (
+          <div className="flex gap-3">
+            {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
+                disabled={submitting}
+                onMouseEnter={() => setHover(n)}
+                onMouseLeave={() => setHover(0)}
                 onClick={() => handleRating(n)}
-                className="text-2xl"
+                className={`transition-transform transform hover:scale-125 disabled:opacity-50`}
               >
-                ⭐
+                <Star
+                  size={40}
+                  fill={(hover || 0) >= n ? "#f97316" : "none"} 
+                  color={(hover || 0) >= n ? "#f97316" : "#cbd5e1"}
+                  strokeWidth={2}
+                />
               </button>
             ))}
           </div>
+          
+          <p className="mt-4 text-sm text-gray-400 italic">
+            Tap a star to submit instantly
+          </p>
         </div>
       )}
 
@@ -215,7 +256,7 @@ if (blogData.length > 0) {
             <div
               key={item._id}
               onClick={() => navigate("/app/adopt")}
-              className="min-w-[200px] bg-white p-4 rounded-xl shadow cursor-pointer hover:shadow-md"
+              className="min-w-50 bg-white p-4 rounded-xl shadow cursor-pointer hover:shadow-md"
             >
               <div className="h-24 bg-gray-200 rounded mb-2 overflow-hidden">
                 {item.pet?.profilePhoto && (

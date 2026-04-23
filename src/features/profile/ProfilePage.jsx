@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
+import { BREEDS_LIST } from "../../constants/breed"
 
 export default function ProfilePage() {
   const token = localStorage.getItem("token")
@@ -95,25 +96,74 @@ export default function ProfilePage() {
   }
 
   // Update pet
-  const handlePetUpdate = async (pet) => {
+// Update pet
+  // const handlePetUpdate = async (pet) => {
+  //   try {
+  //     const formData = new FormData()
+
+  //     Object.keys(pet).forEach(key => {
+  //       // 🛑 CRITICAL FIX 1: Do not send immutable fields to the backend!
+  //       if (["_id", "owner", "createdAt", "updatedAt", "__v"].includes(key)) return;
+
+  //       if (key === "fears") {
+  //         formData.append(key, JSON.stringify(pet[key] || []))
+  //       } else {
+  //         formData.append(key, pet[key])
+  //       }
+  //     })
+
+  //     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${pet._id}`, {
+  //       method: "PUT",
+  //       headers: { Authorization: `Bearer ${token}` },
+  //       body: formData
+  //     })
+
+  //     const updatedPet = await res.json()
+
+  //     // 🛑 CRITICAL FIX 2: Check for success before updating state!
+  //     if (!res.ok) {
+  //       toast.error(updatedPet.message || "Database rejected the update");
+  //       return; // Abort here so we don't wipe out the UI!
+  //     }
+
+  //     setPets(prev =>
+  //       prev.map(p => p._id === pet._id ? updatedPet : p)
+  //     )
+
+  //     setEditingPetId(null)
+  //     toast.success("Dog updated")
+
+  //   } catch (error) {
+  //     toast.error("Error updating dog")
+  //   }
+  // }
+const handlePetUpdate = async (pet) => {
     try {
-      const formData = new FormData()
+      // 1. Create a clean payload without MongoDB protected fields
+      const payload = { ...pet };
+      delete payload._id;
+      delete payload.owner;
+      delete payload.createdAt;
+      delete payload.updatedAt;
+      delete payload.__v;
+      delete payload.profilePhoto; // We aren't updating the photo here
 
-      Object.keys(pet).forEach(key => {
-        if (key === "fears") {
-          formData.append(key, JSON.stringify(pet[key]))
-        } else {
-          formData.append(key, pet[key])
-        }
-      })
-
+      // 2. Send as pure JSON
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${pet._id}`, {
         method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json" // 🔥 THE FIX
+        },
+        body: JSON.stringify(payload)
       })
 
       const updatedPet = await res.json()
+
+      if (!res.ok) {
+        toast.error(updatedPet.message || "Failed to update");
+        return; 
+      }
 
       setPets(prev =>
         prev.map(p => p._id === pet._id ? updatedPet : p)
@@ -122,11 +172,10 @@ export default function ProfilePage() {
       setEditingPetId(null)
       toast.success("Dog updated")
 
-    } catch {
+    } catch (error) {
       toast.error("Error updating dog")
     }
   }
-
   const handlePetDelete = async (id) => {
     try {
       await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${id}`, {
@@ -142,30 +191,38 @@ export default function ProfilePage() {
     }
   }
 
-  const handleAddPet = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: "New Dog",
-          type: "Dog",
-          breed: "",
-          age: ""
-        })
+const handleAddPet = async () => {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        name: "New Dog",
+        type: "Dog",
+        breed: "Indie",
+        size: "Medium"
       })
+    })
 
-      const data = await res.json()
-      setPets([...pets, data.pet])
-      toast.success("Dog added")
+    const data = await res.json()
+    
+    // BACKEND CHECK: Your backend returns { message, pet }. 
+    // We only want the 'pet' object in our array.
+    const newPet = data.pet; 
 
-    } catch {
-      toast.error("Error adding dog")
+    if (newPet) {
+      setPets(prev => [...prev, newPet]);
+      toast.success("Dog added");
+      // Optional: Navigate to PetsPage to fill in the rest of the details
+      // navigate("/app/pets", { state: { editPet: newPet } }); 
     }
+  } catch (error) {
+    toast.error("Error adding dog")
   }
+}
 
   if (loading) return <div className="p-10">Loading...</div>
 
@@ -329,28 +386,26 @@ export default function ProfilePage() {
               key={pet._id}
               className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition relative"
             >
-              {editingPetId === pet._id ? (
-                <>
-                  <input
-                    value={pet.name}
-                    onChange={(e) =>
-                      setPets(pets.map(p =>
-                        p._id === pet._id ? { ...p, name: e.target.value } : p
-                      ))
-                    }
-                    className="w-full p-3 border rounded-xl mb-3"
-                  />
+             {editingPetId === pet._id ? (
+  <>
+    <input
+      value={pet.name}
+      onChange={(e) => setPets(pets.map(p => p._id === pet._id ? { ...p, name: e.target.value } : p))}
+      className="w-full p-3 border rounded-xl mb-3"
+    />
 
-                  <input
-                    value={pet.breed || ""}
-                    onChange={(e) =>
-                      setPets(pets.map(p =>
-                        p._id === pet._id ? { ...p, breed: e.target.value } : p
-                      ))
-                    }
-                    placeholder="Breed"
-                    className="w-full p-3 border rounded-xl mb-4"
-                  />
+    {/* REPLACED BREED INPUT START */}
+    <input
+      list="profile-breed-options"
+      value={pet.breed || ""}
+      onChange={(e) => setPets(pets.map(p => p._id === pet._id ? { ...p, breed: e.target.value } : p))}
+      placeholder="Breed"
+      className="w-full p-3 border rounded-xl mb-4"
+    />
+    <datalist id="profile-breed-options">
+      {BREEDS_LIST.map(b => <option key={b} value={b} />)}
+    </datalist>
+    {/* REPLACED BREED INPUT END */}
 
                   <div className="flex gap-3">
                     <button

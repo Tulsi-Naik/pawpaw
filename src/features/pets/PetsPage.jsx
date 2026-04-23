@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 import { useNavigate, useLocation } from "react-router-dom"
+import { BREEDS_LIST } from "../../constants/breed"
 
 export default function PetsPage() {
 
@@ -56,55 +57,57 @@ const handlePhoto = (e) => {
 }
 
 const handleSubmit = async (e) => {
-  e.preventDefault()
+  e.preventDefault();
+  const formData = new FormData();
 
-  const formData = new FormData()
-
-  Object.keys(form).forEach(key => {
+  Object.keys(form).forEach((key) => {
     if (key === "fears") {
-      formData.append(key, JSON.stringify(form[key]))
+      formData.append(key, JSON.stringify(form[key]));
     } else {
-      formData.append(key, form[key])
+      formData.append(key, form[key]);
     }
-  })
+  });
 
-  let res
+  try {
+    let res = await fetch(
+      editingPet 
+        ? `${import.meta.env.VITE_API_URL}/api/pets/${editingPet}` 
+        : `${import.meta.env.VITE_API_URL}/api/pets/add`, 
+      {
+        method: editingPet ? "PUT" : "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      }
+    );
 
-  if (editingPet) {
-    res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/${editingPet}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: formData
-    })
-  } else {
-    res = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/add`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: formData
-    })
+    if (res.ok) {
+      const savedData = await res.json();
+      const petToDisplay = editingPet ? savedData : savedData.pet;
+
+      // 1. Update the list immediately in local state
+      setPets(prev => {
+        if (editingPet) {
+          return prev.map(p => p._id === editingPet ? petToDisplay : p);
+        } else {
+          return [...prev, petToDisplay];
+        }
+      });
+
+      toast.success(editingPet ? "Dog updated 🐶" : "Dog added 🐶");
+      
+      // 2. Clean up UI
+      setShowForm(false);
+      setEditingPet(null);
+      setForm(emptyForm);
+      
+      // DO NOT put a fetch here. The state update above handles it!
+    } else {
+      toast.error("Error saving dog");
+    }
+  } catch (err) {
+    toast.error("Network error");
   }
-
-  if (res.ok) {
-    toast.success(editingPet ? "Dog updated 🐶" : "Dog added 🐶")
-
-    setShowForm(false)
-    setEditingPet(null)
-    setForm(emptyForm)
-
-    const data = await fetch(`${import.meta.env.VITE_API_URL}/api/pets/my`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).then(r => r.json())
-
-    setPets(data)
-  } else {
-    toast.error("Error saving dog")
-  }
-}
-
+};
   const toggleFear = (fear) => {
     if (form.fears.includes(fear)) {
       setForm({
@@ -126,8 +129,8 @@ const handleSubmit = async (e) => {
       name: pet.name || "",
       type: pet.type || "Dog",
       breed: pet.breed || "",
-      dateOfBirth: pet.dateOfBirth || "",
-size: pet.size || "",
+      dateOfBirth: pet.dateOfBirth ? pet.dateOfBirth.split('T')[0] : "",
+      size: pet.size || "",
       energyLevel: pet.energyLevel ?? 3,
       friendliness: pet.friendliness ?? 3,
       anxietyLevel: pet.anxietyLevel ?? 2,
@@ -173,12 +176,32 @@ size: pet.size || "",
             onChange={e => setForm({ ...form, name: e.target.value })}
           />
 
-          <input
-            placeholder="Breed"
-            value={form.breed}
-            className="w-full border p-3 rounded"
-            onChange={e => setForm({ ...form, breed: e.target.value })}
-          />
+        {/* Breed Selection with Search/Datalist */}
+<div className="space-y-1">
+  <label className="text-sm font-medium text-gray-700">Breed</label>
+  <input
+    list="breed-options"
+    placeholder="Search or select breed..."
+    value={form.breed}
+    className="w-full border p-3 rounded-xl bg-white"
+    onChange={e => setForm({ ...form, breed: e.target.value })}
+  />
+  <datalist id="breed-options">
+    {BREEDS_LIST.map((breed) => (
+      <option key={breed} value={breed} />
+    ))}
+  </datalist>
+
+  {/* FIXED: Check if the current value is 'Other' OR something NOT in our list */}
+  {(form.breed === "Other" || (form.breed && !BREEDS_LIST.includes(form.breed))) && (
+    <input
+      placeholder="Type the specific breed here..."
+      className="w-full border p-3 rounded-xl bg-orange-50 mt-2 border-orange-200 animate-in slide-in-from-top-1"
+      value={form.breed === "Other" ? "" : form.breed} // Clear 'Other' text to let them type
+      onChange={e => setForm({ ...form, breed: e.target.value })} 
+    />
+  )}
+</div>
 <input
   type="date"
   value={form.dateOfBirth}
