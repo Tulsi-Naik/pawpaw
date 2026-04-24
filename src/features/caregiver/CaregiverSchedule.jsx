@@ -54,12 +54,13 @@ const startTracking = (bookingId) => {
     async (position) => {
       const lat = position.coords.latitude
       const lng = position.coords.longitude
+      console.log("GPS:", position.coords.latitude, position.coords.longitude)
 
       if (lastLocation) {
         const from = turf.point([lastLocation.lng, lastLocation.lat])
         const to = turf.point([lng, lat])
         const moved = turf.distance(from, to, { units: "meters" })
-        if (moved < 20) return
+        if (moved < 5) return
       }
 
       setLastLocation({ lat, lng })
