@@ -235,7 +235,7 @@ function App() {
   <Route path="profile-setup" element={<CaregiverProfileSetup />} />
 <Route path="earnings" element={<CaregiverEarnings />} />
 </Route>
-
+//
 <Route
   path="/admin"
   element={
