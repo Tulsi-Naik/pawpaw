@@ -221,7 +221,8 @@ function App() {
 <Route path="adopt/my-listings" element={<MyListings />} />
 <Route path="adopt/my-requests" element={<MyRequests />} />
       </Route>
-      {/* CAREGIVER AREA */}
+      {/* CAREGIVER ARea*/}
+      
 <Route
   path="/caregiver"
   element={
@@ -235,7 +236,7 @@ function App() {
   <Route path="profile-setup" element={<CaregiverProfileSetup />} />
 <Route path="earnings" element={<CaregiverEarnings />} />
 </Route>
-//
+
 <Route
   path="/admin"
   element={
