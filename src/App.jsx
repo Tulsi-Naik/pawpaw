@@ -221,7 +221,7 @@ function App() {
 <Route path="adopt/my-listings" element={<MyListings />} />
 <Route path="adopt/my-requests" element={<MyRequests />} />
       </Route>
-      {/* CAREGIVER ARea*/}
+      {/* CAREGIVER area*/}
       
 <Route
   path="/caregiver"
