@@ -49,7 +49,7 @@ import BlogPreview from "./components/BlogPreview"
 import AdminAddBlog from "./features/admin/AdminAddBlog"
 import AdminBlogs from "./features/admin/AdminBlogs"
 import AdminEditBlog from "./features/admin/AdminEditBlog"
-import AdminBreeds from "./features/admin/AdminBreeds"
+import AdminBreeds from "./features/admin/AdminBreeds.jsx"
 import AdminCaregiversReport from "./features/admin/AdminCaregiversReport"
 import AdminAnalytics from "./features/admin/AdminAnalytics"
 //
