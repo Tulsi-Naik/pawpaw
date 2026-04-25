@@ -186,16 +186,26 @@ const startTracking = (bookingId) => {
                 >
                   {/* DOG & STATUS */}
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-bold text-lg">
-                        🐕 {b.pet?.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {b.pet?.breed || "Unknown"}
-                        {b.pet?.dateOfBirth && (
-                          <> • {getDogAge(b.pet.dateOfBirth)} yrs</>
-                        )}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-orange-100 shrink-0 border border-orange-200">
+                        <img
+                          src={b.pet?.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(b.pet?.name || "Dog")}&background=f97316&color=fff`}
+                          alt={b.pet?.name || "Dog"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+
+                      <div>
+                        <h3 className="font-bold text-lg">
+                          {b.pet?.name || "Dog"}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {b.pet?.breed || "Unknown"}
+                          {b.pet?.dateOfBirth && (
+                            <> • {getDogAge(b.pet.dateOfBirth)} yrs</>
+                          )}
+                        </p>
+                      </div>
                     </div>
                     {b.status === "Cancelled" && (
                       <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase border border-red-200">
