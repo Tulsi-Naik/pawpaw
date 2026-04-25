@@ -1,18 +1,18 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Calendar from "react-calendar"
 import "react-calendar/dist/Calendar.css"
 import toast from "react-hot-toast"
 import { io } from "socket.io-client"
-import { useRef } from "react"
+import * as turf from "@turf/turf"
 
 export default function CaregiverSchedule() {
   const token = localStorage.getItem("token")
   const [bookings, setBookings] = useState([])
   const [date, setDate] = useState(new Date())
-  const [watchId, setWatchId] = useState(null)
-  const [lastLocation, setLastLocation] = useState(null)
 
 const socketRef = useRef(null)
+const watchIdRef = useRef(null)
+const lastLocationRef = useRef(null)
 
 useEffect(() => {
   socketRef.current = io(import.meta.env.VITE_API_URL)
@@ -31,62 +31,65 @@ useEffect(() => {
       .then(data => setBookings(data))
   }, [token])
 
-  const tileClassName = ({ date }) => {
-    const bookingDates = bookings.map(b =>
-      new Date(b.date).toDateString()
-    )
-    if (bookingDates.includes(date.toDateString())) {
-      return "bg-green-400 text-white rounded-full"
-    }
+const publishLocation = async (bookingId, position, force = false) => {
+  const lat = position.coords.latitude
+  const lng = position.coords.longitude
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return
+
+  const lastLocation = lastLocationRef.current
+
+  if (lastLocation && !force) {
+    const from = turf.point([lastLocation.lng, lastLocation.lat])
+    const to = turf.point([lng, lat])
+    const moved = turf.distance(from, to, { units: "meters" })
+    if (moved < 5) return
   }
 
-  
+  lastLocationRef.current = { lat, lng }
 
-const startTracking = (bookingId) => {
-  if (watchId) {
-    navigator.geolocation.clearWatch(watchId)
-  }
-
-  // ✅ join room
-  socketRef.current.emit("join-booking", bookingId)
-
-  const id = navigator.geolocation.watchPosition(
-    async (position) => {
-      const lat = position.coords.latitude
-      const lng = position.coords.longitude
-      console.log("GPS:", position.coords.latitude, position.coords.longitude)
-
-      if (lastLocation) {
-        const from = turf.point([lastLocation.lng, lastLocation.lat])
-        const to = turf.point([lng, lat])
-        const moved = turf.distance(from, to, { units: "meters" })
-        if (moved < 5) return
-      }
-
-      setLastLocation({ lat, lng })
-
-      // API (keep)
-      await fetch(`${import.meta.env.VITE_API_URL}/api/location/update`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          bookingId,
-          lat,
-          lng
-        })
-      })
-
-      // ✅ REAL-TIME
-      socketRef.current.emit("send-location", {
+  try {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/location/update`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
         bookingId,
         lat,
         lng
       })
-    },
-    (err) => console.log("GPS error", err),
+    })
+
+    socketRef.current?.emit("send-location", {
+      bookingId,
+      lat,
+      lng
+    })
+  } catch {
+    toast.error("Location update failed")
+  }
+}
+
+const startTracking = (bookingId) => {
+  if (!navigator.geolocation) {
+    toast.error("Location tracking is not available in this browser")
+    return
+  }
+
+  if (watchIdRef.current) {
+    navigator.geolocation.clearWatch(watchIdRef.current)
+  }
+
+  lastLocationRef.current = null
+
+  // ✅ join room
+  socketRef.current?.emit("join-booking", bookingId)
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => publishLocation(bookingId, position, true),
+    () => toast.error("Please allow location permission to start tracking"),
     {
       enableHighAccuracy: true,
       maximumAge: 0,
@@ -94,7 +97,20 @@ const startTracking = (bookingId) => {
     }
   )
 
-  setWatchId(id) // ✅ IMPORTANT
+  const id = navigator.geolocation.watchPosition(
+    (position) => publishLocation(bookingId, position),
+    (err) => {
+      console.log("GPS error", err)
+      toast.error("Unable to read live location")
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 10000
+    }
+  )
+
+  watchIdRef.current = id
 }
 
 
@@ -277,8 +293,10 @@ const startTracking = (bookingId) => {
                             method: "PUT",
                             headers: { Authorization: `Bearer ${token}` }
                           })
-                          if (watchId) {
-                            navigator.geolocation.clearWatch(watchId)
+                          if (watchIdRef.current) {
+                            navigator.geolocation.clearWatch(watchIdRef.current)
+                            watchIdRef.current = null
+                            lastLocationRef.current = null
                           }
                           toast.success("Walk completed 🐾")
                           window.location.reload()
