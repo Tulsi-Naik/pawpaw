@@ -6,6 +6,8 @@ export default function AppLayout() {
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [searchOpen, setSearchOpen] = useState(false)
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -36,6 +38,51 @@ useEffect(() => {
     { name: "My Bookings", path: "/app/my-bookings" },
     { name: "Profile", path: "/app/profile" }
   ]
+
+  const searchItems = [
+    {
+      title: "Dog Walking",
+      path: "/app/book",
+      keywords: ["walk", "walking", "book", "booking", "dog walk", "brooming"]
+    },
+    {
+      title: "Grooming",
+      path: "/app/grooming",
+      keywords: ["grooming", "groom", "bath", "haircut"]
+    },
+    {
+      title: "Adoption",
+      path: "/app/adopt",
+      keywords: ["adoption", "adopt", "adopt dog"]
+    },
+    {
+      title: "My Bookings",
+      path: "/app/my-bookings",
+      keywords: ["my bookings", "bookings", "track", "payment", "history"]
+    }
+  ]
+
+  const filteredSearchItems = searchItems.filter(item => {
+    const keyword = searchTerm.trim().toLowerCase()
+    if (!keyword) return false
+
+    return item.title.toLowerCase().includes(keyword) ||
+      item.keywords.some(word => word.includes(keyword))
+  })
+
+  const goToSearchResult = (item) => {
+    navigate(item.path)
+    setSearchTerm("")
+    setSearchOpen(false)
+  }
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+
+    if (filteredSearchItems.length > 0) {
+      goToSearchResult(filteredSearchItems[0])
+    }
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -111,13 +158,47 @@ useEffect(() => {
           </button>
 
           {/* Global Search */}
-<div className="flex items-center bg-gray-100 rounded-full px-4 py-2 w-full max-w-md mx-4">            <Search size={18} className="text-gray-500 mr-2" />
+<form
+  onSubmit={handleSearchSubmit}
+  className="relative w-full max-w-md mx-4"
+>
+  <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+            <Search size={18} className="text-gray-500 mr-2" />
             <input
               type="text"
-              placeholder="Search services..."
+              value={searchTerm}
+              onFocus={() => setSearchOpen(true)}
+              onBlur={() => window.setTimeout(() => setSearchOpen(false), 120)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value)
+                setSearchOpen(true)
+              }}
+              placeholder="Search walking, grooming, adoption..."
               className="bg-transparent outline-none w-full text-sm"
             />
           </div>
+
+  {searchOpen && searchTerm.trim() && (
+    <div className="absolute left-0 right-0 top-12 bg-white rounded-xl shadow-lg border z-50 overflow-hidden">
+      {filteredSearchItems.length > 0 ? (
+        filteredSearchItems.map(item => (
+          <button
+            key={item.path}
+            type="button"
+            onClick={() => goToSearchResult(item)}
+            className="w-full text-left px-4 py-3 text-sm hover:bg-orange-50"
+          >
+            {item.title}
+          </button>
+        ))
+      ) : (
+        <p className="px-4 py-3 text-sm text-gray-500">
+          No matching page found
+        </p>
+      )}
+    </div>
+  )}
+</form>
 
           {/* Profile */}
 <div className="ml-auto relative">         
