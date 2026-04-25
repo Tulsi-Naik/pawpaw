@@ -52,6 +52,7 @@ import AdminEditBlog from "./features/admin/AdminEditBlog"
 import AdminBreeds from "./features/admin/AdminBreeds"
 import AdminCaregiversReport from "./features/admin/AdminCaregiversReport"
 import AdminAnalytics from "./features/admin/AdminAnalytics"
+import AdminContactMessages from "./features/admin/AdminContactMessages"
 //
 function Home() {
   return (
@@ -257,6 +258,7 @@ function App() {
 <Route path="breeds" element={<AdminBreeds />} />
 <Route path="caregiver-report" element={<AdminCaregiversReport />} />
 <Route path="analytics" element={<AdminAnalytics />} />
+<Route path="contact-queries" element={<AdminContactMessages />} />
 </Route>
     </Routes>
   )

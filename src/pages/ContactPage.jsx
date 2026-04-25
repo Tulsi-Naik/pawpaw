@@ -1,80 +1,165 @@
-export default function ContactPage() {
-  return (
-    <section className="min-h-screen bg-linear-to-br from-yellow-50 via-white to-orange-50 py-28 px-6">
-      <div className="max-w-6xl mx-auto">
+import { useState } from "react"
+import toast from "react-hot-toast"
+import { Mail, MapPin, Phone } from "lucide-react"
 
-        {/* Header */}
-        <div className="text-center mb-24">
-          <h1 className="text-6xl font-extrabold text-gray-900 mb-6">
-            Let’s Talk 🐾
+const initialForm = {
+  name: "",
+  email: "",
+  phone: "",
+  subject: "",
+  message: ""
+}
+
+export default function ContactPage() {
+  const [form, setForm] = useState(initialForm)
+  const [submitting, setSubmitting] = useState(false)
+
+  const updateField = (field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      toast.error("Please add your name, email, and message")
+      return
+    }
+
+    setSubmitting(true)
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast.error(data.message || "Could not send message")
+        return
+      }
+
+      setForm(initialForm)
+      toast.success("Message sent. PawPaw will get back to you soon.")
+    } catch {
+      toast.error("Could not send message right now")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="min-h-screen bg-linear-to-br from-yellow-50 via-white to-orange-50 py-24 px-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-5">
+            Contact PawPaw
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Whether it’s about walks, grooming or meals —  
-            we’re here to help. Our team responds within 24 hours.
+            Questions about walks, grooming, adoption, payments, or bookings can be sent here.
           </p>
         </div>
 
-        {/* Main Grid */}
-        <div className="grid md:grid-cols-2 gap-16 items-start">
-
-          {/* Left Info */}
-          <div className="space-y-10">
-
-            <div className="bg-white p-10 rounded-3xl shadow-md hover:shadow-xl transition">
-              <h3 className="text-xl font-bold mb-3">📧 Email Support</h3>
-              <p className="text-gray-600">support@pawpaw.in</p>
-              <p className="text-sm text-gray-500 mt-2">
-                For bookings, issues or general questions.
-              </p>
+        <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-10 items-start">
+          <div className="space-y-5">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100 flex gap-4">
+              <div className="w-11 h-11 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                <Mail size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Email</h3>
+                <a href="mailto:tulsivnaik@gmail.com" className="text-gray-700 hover:text-orange-600">
+                  admin@pawpaw.com
+                </a>
+              </div>
             </div>
 
-            <div className="bg-white p-10 rounded-3xl shadow-md hover:shadow-xl transition">
-              <h3 className="text-xl font-bold mb-3">📞 Phone Support</h3>
-              <p className="text-gray-600">+91 98765 43210</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Available 9 AM – 8 PM, all days.
-              </p>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100 flex gap-4">
+              <div className="w-11 h-11 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                <Phone size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Phone</h3>
+                <a href="tel:+919066251008" className="text-gray-700 hover:text-orange-600">
+                  +91 90662 51008
+                </a>
+              </div>
             </div>
 
-            <div className="bg-white p-10 rounded-3xl shadow-md hover:shadow-xl transition">
-              <h3 className="text-xl font-bold mb-3">📍 Service Locations</h3>
-              <p className="text-gray-600">
-                Currently serving Sangli, Kolhapur  
-                and expanding across nearby cities.
-              </p>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100 flex gap-4">
+              <div className="w-11 h-11 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                <MapPin size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Service Area</h3>
+                <p className="text-gray-700">Vijaynagar, Sangli</p>
+              </div>
             </div>
-
           </div>
 
-          {/* Right Form */}
-          <div className="bg-white p-12 rounded-3xl shadow-2xl">
-
-            <h3 className="text-2xl font-bold mb-8 text-gray-900">
-              Send us a message
+          <div className="bg-white p-7 md:p-10 rounded-2xl shadow-xl border border-orange-100">
+            <h3 className="text-2xl font-bold mb-6 text-gray-900">
+              Send a Query
             </h3>
 
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => updateField("name", e.target.value)}
+                    placeholder="Your name"
+                    className="w-full p-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter your name"
-                  className="w-full p-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => updateField("email", e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full p-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full p-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
-                />
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                    placeholder="Optional"
+                    className="w-full p-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject
+                  </label>
+                  <input
+                    type="text"
+                    value={form.subject}
+                    onChange={(e) => updateField("subject", e.target.value)}
+                    placeholder="Booking, adoption, payment..."
+                    className="w-full p-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+                  />
+                </div>
               </div>
 
               <div>
@@ -82,25 +167,24 @@ export default function ContactPage() {
                   Message
                 </label>
                 <textarea
-                  rows="4"
-                  placeholder="How can we help you?"
-                  className="w-full p-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+                  rows="5"
+                  value={form.message}
+                  onChange={(e) => updateField("message", e.target.value)}
+                  placeholder="Tell us how we can help."
+                  className="w-full p-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition resize-none"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold hover:bg-orange-600 transition"
+                disabled={submitting}
+                className="w-full bg-orange-500 text-white py-3.5 rounded-xl font-semibold hover:bg-orange-600 disabled:opacity-60 transition"
               >
-                Send Message
+                {submitting ? "Sending..." : "Send Message"}
               </button>
-
             </form>
-
           </div>
-
         </div>
-
       </div>
     </section>
   )

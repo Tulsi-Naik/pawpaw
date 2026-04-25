@@ -125,6 +125,18 @@ export default function AdminLayout() {
 >
   Analytics
 </NavLink>
+<NavLink
+  to="/admin/contact-queries"
+  className={({ isActive }) =>
+    `block px-4 py-2 rounded-lg ${
+      isActive
+        ? "bg-orange-100 text-orange-600 font-semibold"
+        : "hover:bg-gray-100"
+    }`
+  }
+>
+  Contact Queries
+</NavLink>
           <NavLink
   to="/admin/blogs"
   className={({ isActive }) =>

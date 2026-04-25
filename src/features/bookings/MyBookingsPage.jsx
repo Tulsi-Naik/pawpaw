@@ -12,27 +12,32 @@ export default function MyBookingsPage() {
 const [fromDate, setFromDate] = useState("")
 const [toDate, setToDate] = useState("")
   const [tab, setTab] = useState("active")
+const matchesFilters = (booking) => {
+  const keyword = search.trim().toLowerCase()
+  const bookingDate = new Date(booking.date)
+
+  const matchSearch = keyword
+    ? booking.pet?.name?.toLowerCase().includes(keyword) ||
+      booking.service?.category?.toLowerCase().includes(keyword) ||
+      booking.status?.toLowerCase().includes(keyword)
+    : true
+
+  const matchFrom = fromDate ? bookingDate >= new Date(fromDate) : true
+  const matchTo = toDate ? bookingDate <= new Date(toDate) : true
+
+  return matchSearch && matchFrom && matchTo
+}
+
 const activeBookings = bookings
   .filter(b => b.status !== "Completed")
+  .filter(matchesFilters)
   .sort((a, b) => new Date(a.date) - new Date(b.date)) // nearest first
 
 const historyBookings = bookings
   .filter(b => b.status === "Completed")
   .sort((a, b) => new Date(b.date) - new Date(a.date)) // latest first
 
-const filteredHistory = historyBookings.filter(b => {
-  const matchSearch =
-    b.pet?.name?.toLowerCase().includes(search.toLowerCase()) ||
-    b.service?.category?.toLowerCase().includes(search.toLowerCase())
-
-  const bookingDate = new Date(b.date)
-
-  const matchFrom = fromDate ? bookingDate >= new Date(fromDate) : true
-  const matchTo = toDate ? bookingDate <= new Date(toDate) : true
-
-
-  return matchSearch && matchFrom && matchTo
-})
+const filteredHistory = historyBookings.filter(matchesFilters)
 
 const groupedHistory = filteredHistory.reduce((acc, booking) => {
   const month = new Date(booking.date).toLocaleString("en-IN", {
@@ -127,7 +132,7 @@ await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
     const rzp = new window.Razorpay(options)
     rzp.open()
 
-  } catch (err) {
+  } catch {
     toast.error("Payment failed")
   }
 }
@@ -170,10 +175,52 @@ await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
         </p>
       )}
 
+      {bookings.length > 0 && (
+        <div className="flex flex-col md:flex-row gap-4 justify-center mt-6">
+          <input
+            type="text"
+            placeholder="Search by dog, service, or status..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-4 py-2 border rounded-lg w-full md:w-1/3"
+          />
+
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="px-4 py-2 border rounded-lg"
+          />
+
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="px-4 py-2 border rounded-lg"
+          />
+
+          {(search || fromDate || toDate) && (
+            <button
+              onClick={() => {
+                setSearch("")
+                setFromDate("")
+                setToDate("")
+              }}
+              className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+
       {/* ACTIVE BOOKINGS */}
 
 {tab === "active" && (
-  <div className="grid md:grid-cols-2 gap-6">
+  activeBookings.length === 0 ? (
+    <p className="text-center text-gray-500">No active bookings found.</p>
+  ) : (
+    <div className="grid md:grid-cols-2 gap-6">
             {activeBookings.map(booking => (
           <div
             key={booking._id}
@@ -313,6 +360,7 @@ await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
           </div>
         ))}
       </div>
+  )
     
 )}
 
@@ -320,31 +368,6 @@ await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
 
 {tab === "history" && Object.keys(groupedHistory).length > 0 && (
   <>
-  <div className="flex flex-col md:flex-row gap-4 justify-center mt-6">
-
-  <input
-    type="text"
-    placeholder="Search by dog or service..."
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    className="px-4 py-2 border rounded-lg w-full md:w-1/3"
-  />
-
-  <input
-    type="date"
-    value={fromDate}
-    onChange={(e) => setFromDate(e.target.value)}
-    className="px-4 py-2 border rounded-lg"
-  />
-
-  <input
-    type="date"
-    value={toDate}
-    onChange={(e) => setToDate(e.target.value)}
-    className="px-4 py-2 border rounded-lg"
-  />
-
-</div>
     <h2 className="text-3xl font-bold text-center mt-16">
       Booking History
     </h2>
@@ -435,6 +458,10 @@ await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
       
     ))}
   </>
+)}
+
+{tab === "history" && Object.keys(groupedHistory).length === 0 && (
+  <p className="text-center text-gray-500">No booking history found.</p>
 )}
 
     </div>
