@@ -218,7 +218,7 @@ const startTracking = (bookingId) => {
                     </div>
                     {b.pet?.owner?.address && b.status !== "Cancelled" && (
                       <a 
-                        href={`http://googleusercontent.com/maps.google.com/2{encodeURIComponent(b.pet.owner.address + ", " + b.pet.owner.city)}`}
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${b.pet.owner.address}, ${b.pet.owner.city || ""}`)}`}
                         target="_blank"
                         rel="noreferrer"
                         className="mt-3 block w-full text-center py-2 bg-white border border-orange-200 text-orange-600 text-xs font-bold rounded-lg hover:bg-orange-100 transition"
